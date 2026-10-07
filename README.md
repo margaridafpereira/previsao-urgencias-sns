@@ -4,7 +4,6 @@ Forecasts the **average waiting time** and the **number of emergency episodes** 
 
 **Who it is for:**
 - **Citizens**: know whether the coming days will be a peak.
-- **Journalists and researchers**: an objective baseline ("is today worse than expected?").
 - **Hospital management**: anticipate flu and heatwave peaks.
 
 **Constraint:** zero cost. Public data only, free models and free tooling.
