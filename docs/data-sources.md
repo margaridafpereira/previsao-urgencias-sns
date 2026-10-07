@@ -38,7 +38,15 @@ Hospital care activity, seasonal monitoring.
 
 ### 1.2 `atividade-sindrome-gripal-csh`: daily, per region (feature: flu)
 
-Same schema as 1.1 (`periodo`, `ars`, `indicador`, `valor`, `unidade`), with about 84,000 rows. Flu is the main driver of the winter peaks, which makes this the most promising external feature.
+Same schema as 1.1 (`periodo`, `ars`, `indicador`, `valor`, `unidade`), with about 84,000 rows. Three of its four indicators (waiting time, episodes, non-urgent rate) repeat 1.1 with identical values. The only new one is:
+
+- `Taxa de episódios de urgência com diagnóstico de infeção respiratória`: share of episodes diagnosed with a respiratory infection (%). This is the flu signal.
+
+### Data quality (daily datasets)
+
+- All regions share an 11-day gap, from 2025-06-24 to 2025-07-04.
+- The **Algarve waiting time** has large gaps (153 days missing in 2017, 147 in 2019, 100 in 2024, 78 in 2025, and only 25 of 276 days present in 2026, the last one on 2026-06-14) and extreme outliers (up to 378 minutes). The Algarve episode counts are complete. See D7 in [decisions.md](decisions.md).
+- `src/data.py` (`load_daily()`) merges both datasets and the weather into one row per `periodo` × `ars`, keeping missing days as rows with NaN.
 
 ### 1.3 `atendimentos-em-urgencia-triagem-manchester`: monthly, per hospital
 

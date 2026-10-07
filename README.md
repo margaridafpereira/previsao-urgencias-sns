@@ -19,6 +19,8 @@ Forecasts the **average waiting time** and the **number of emergency episodes** 
 
 ```
 src/ingest/        data collection scripts
+src/data.py        loads the raw data into one daily table (date × region)
+notebooks/         analysis notebooks (01-eda: exploratory data analysis and key findings)
 data/raw/          downloaded datasets (Parquet, versioned in Git)
 tests/             tests
 .github/workflows/ scheduled daily data collection

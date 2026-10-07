@@ -65,3 +65,26 @@ The same rule applies to the weather data (`data/raw/meteo.parquet`), which Open
 - (+) 5 API calls, simple to understand and to join on `ars`.
 - (−) Inland and mountain areas (Trás-os-Montes, Beira Interior) are not represented. Temperature anomalies tend to be regional, so the error should be small; revisit if weather features turn out to matter a lot.
 - When features are built, the `Portugal Continental` series will either get a population-weighted average of the five regions or be modelled without weather features.
+
+---
+
+## D6: Keep the COVID period, flag it, and evaluate only on recent data
+
+**Context.** From March 2020 to early 2021 emergency episodes dropped by about 40 % and waiting times dropped with them. Since 2022 waiting times are about 30 % higher than in 2017–2019. Neither period reflects the current regime. Dropping the COVID months would break the lag features (yesterday, last week) around the gap.
+
+**Decision.**
+- Keep all data, and add an `is_covid` feature for 2020-03-01 to 2021-03-31.
+- Evaluate (validation and test) only on data from 2023 onwards.
+- As an experiment, also train on 2022 onwards only, and keep whichever performs better on the same test period.
+
+**Consequences.** The models see the full history, including seasonality from 10 winters, but are judged only on the current regime.
+
+---
+
+## D7: The Algarve is not a forecasting target for now
+
+**Context.** The Algarve waiting-time series has large gaps every few years, extreme outliers (up to 378 minutes), and only 25 days of data in 2026 (the last on 2026-06-14). Even a naive forecast has an MAE of about 30 minutes there, against 6–13 in the other regions.
+
+**Decision.** Forecast five series: Norte, Centro, Lisboa e Vale do Tejo, Alentejo and mainland Portugal. Keep the Algarve in the raw data and in the analysis. Its episode counts, which are complete, can still be used as a feature.
+
+**Consequences.** The published forecast will not cover the Algarve. Revisit if the SNS resumes publishing its waiting time consistently; the daily data collection will show it.
