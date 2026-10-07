@@ -292,3 +292,30 @@ The best configuration reached 7.456 minutes, against 7.469 for the current one.
 **Consequences.**
 - All models can be compared in the MLflow UI (`mlflow ui --backend-store-uri sqlite:///mlflow.db`, **Model training** mode, experiment `model-comparison`).
 - `mlflow.db` and `data/forecasts/` are not versioned, because they are reproducible from the code. The numbers that matter are kept in this log and in the README.
+
+---
+
+## D16: Classical statistical models: SARIMAX is a strong reference
+
+**Context.** ARIMA and exponential smoothing are the most used models in the ED forecasting literature ([literature.md](literature.md)). The comparison had no classical statistical model, which any reviewer would expect.
+
+**Decision.**
+- `src/statistical.py` fits one model per series with `statsmodels`. `statsforecast` was rejected because it requires pandas < 3.
+- **ETS:** additive Holt-Winters with a damped trend and weekly seasonality.
+- **SARIMAX:** SARIMA(1,0,1)(1,1,1)₇, with the calendar of the forecast days as exogenous variables (holiday, day after a holiday, Christmas window). The calendar is known in advance.
+- **Fitting:** each model is fitted on the last 3 years of data, every 3 months. Between refits the parameters are fixed and the state is updated with the new data up to each origin. The orders were not tuned.
+
+**Results** (MAE averaged over the five series, horizons 1–7):
+
+| Target | Period | Seasonal naive | ETS | SARIMAX | LightGBM |
+|---|---|---|---|---|---|
+| Waiting time (min) | validation | 9.64 | 8.13 | 7.63 | **7.48** |
+| Waiting time (min) | test | 7.63 | 6.87 | 6.05 | **5.92** |
+| Episodes | validation | 307 | 273 | 249 | **238** |
+| Episodes | test | 278 | 249 | 232 | **219** |
+
+**Consequences.**
+- **SARIMAX, a classical model with three calendar variables and no flu or weather data, is only 2 % behind LightGBM on the waiting time** (6.05 vs. 5.92 on the test period). It beats the LSTM (6.25) and N-HiTS (6.66). This matches the literature: well-specified classical models are hard to beat on short daily series.
+- LightGBM's advantage therefore comes from the extra information (flu, admissions, episodes, weather) and from pooling the five series. It is real but small for the waiting time, and clearer for episodes (−5 %).
+- ETS beats the naive baseline but is the weakest model. It has no calendar variables, and holidays and the Christmas window matter (EDA).
+- SARIMAX makes different errors from LightGBM, so it is a natural candidate for the ensemble.

@@ -31,6 +31,7 @@ src/nhits.py       N-HiTS from neuralforecast, same protocol
 src/ensemble.py    weighted average of saved LightGBM and LSTM forecasts (data/forecasts/)
 src/intervals.py   80 % prediction intervals: quantile LightGBM + conformal calibration
 src/tracking.py    saves forecasts and logs every evaluation to MLflow (experiment model-comparison)
+src/statistical.py ETS and SARIMAX per series (statsmodels)
 notebooks/         analysis notebooks (01-eda: exploratory data analysis and key findings)
 data/raw/          downloaded datasets (Parquet, versioned in Git)
 tests/             tests
@@ -50,6 +51,7 @@ python -m src.baselines         # score the naive baselines (MAE per region and 
 python -m src.lgbm              # LightGBM on validation (a few minutes); --test for the test period
 python -m src.lstm              # LSTM on validation (~7 min); --test for the test period
 python -m src.nhits             # N-HiTS on validation (~15 min); --test for the test period
+python -m src.statistical       # ETS and SARIMAX on validation (~20 min); --test for the test period
 python -m src.ensemble          # combine saved forecasts (run lgbm and lstm, with and without --test, first)
 python -m src.intervals         # prediction intervals (~25 min)
 python -m src.tune_lgbm         # hyperparameter search (~30 min); browse with: mlflow ui --backend-store-uri sqlite:///mlflow.db
@@ -65,6 +67,8 @@ Test period (2025-01-01 onwards), mean absolute error over the five series, hori
 | Model | Waiting time (min) | Episodes per day |
 |---|---|---|
 | Seasonal naive (same weekday last week) | 7.63 | 278 |
+| ETS (D16) | 6.87 | 249 |
+| SARIMAX with calendar (D16) | 6.05 | 232 |
 | LightGBM (D9) | 5.92 | 219 |
 | LSTM (D11) | 6.25 | 216 |
 | N-HiTS (D12) | 6.66 | 249 |
@@ -87,6 +91,8 @@ Chosen models: LightGBM alone for waiting time (the average gains only 0.7 %), a
 | 8 | Ensemble of LightGBM and LSTM, final comparison table (D13) | done |
 | 8b | 80 % prediction intervals: quantile LightGBM with conformal calibration, 85 % / 81 % coverage on test (D14) | done |
 | 8c | Every evaluation logged to MLflow (D15) | done |
+| 8d | Classical models ETS and SARIMAX (D16); literature review (docs/literature.md) | done |
+| 8e | Zero-shot foundation model Chronos-2 (D17) | next |
 | 9 | Daily retraining and forecast in GitHub Actions, demo on Hugging Face Spaces | |
 
 ## Stack (all free)
