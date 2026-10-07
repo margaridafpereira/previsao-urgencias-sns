@@ -81,7 +81,7 @@ The same rule applies to the weather data (`data/raw/meteo.parquet`), which Open
 
 ---
 
-## D7: The Algarve is not a forecasting target for now
+## D7: The Algarve is not a forecasting target for now (superseded by D19)
 
 **Context.** The Algarve waiting-time series has large gaps every few years, extreme outliers (up to 378 minutes), and only 25 days of data in 2026 (the last on 2026-06-14). Even a naive forecast has an MAE of about 30 minutes there, against 6–13 in the other regions.
 
@@ -353,3 +353,19 @@ Its own 10–90 % interval, with no calibration, covers 76.5 % (waiting time, 17
 
   Picking the best combination by looking at the test period would be selection on the test set. Chronos-2 is therefore being run on the validation period, and the combination will be chosen there (D18).
 - **Production cost:** Chronos-2 needs no training, but it is a 120M-parameter model. It takes about 2–3 seconds per forecast day on a CPU, which is fine for one forecast a day in GitHub Actions. The first run downloads the model, which takes about 1–2 minutes.
+
+---
+
+## D19: Which regions are forecast is decided by a data rule (supersedes D7)
+
+**Context.** D7 removed the Algarve by hand, because its waiting-time series has gaps and stopped in June 2026. If the SNS resumed publishing, the project would keep ignoring it until someone changed the code. If another region stopped, the project would keep publishing forecasts with no recent data behind them.
+
+**Decision.**
+- `src/regions.py`, `active_regions()`: a region is forecast if, over the last 90 days, it has a waiting time on **at least 80 % of the days**, and its last value is **at most 14 days** older than the latest day published for any region.
+- Staleness is measured against the latest published day, not against today. The usual publication delay of the SNS (about 4 days) affects every region equally and must not exclude any of them.
+- **Evaluation keeps the fixed set of five series** (`evaluation.TARGET_REGIONS`), so that model comparisons stay valid. The rule applies to the published forecast.
+- Status on 2026-10-07: Norte, Centro, Lisboa e Vale do Tejo, Alentejo and mainland Portugal are active (100 % coverage). The Algarve is inactive (0 % coverage over the last 90 days).
+
+**Consequences.**
+- If the Algarve resumes publishing, it is forecast again after about 72 days of data (80 % of 90), with no code change. The global models already learnt its history from 2017–2025.
+- An inactive region is shown as "no recent waiting-time data", never with an invented or borrowed value (compare snsmonitor.pt in [data-sources.md](data-sources.md)).
