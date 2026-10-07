@@ -197,3 +197,34 @@ The best configuration reached 7.456 minutes, against 7.469 for the current one.
 - The LSTM clearly beats the seasonal naive (−18 % to −24 %), but it does not beat LightGBM. On the waiting time, the primary target, it is about 5 % worse on the test period. On episodes it is about 1 % better, which is within the noise of a single seed. With about 3,500 days per series this is the expected outcome, and it is the honest finding D2 asked for.
 - The LSTM loses more at horizon 1 (6.3 → 5.8 vs. 5.3 for LightGBM on the test period) and less at horizon 7. Its errors may therefore differ enough from LightGBM's for an average of the two to help.
 - Next: N-HiTS or TFT (step 7 in the README), then the comparison and possibly an ensemble.
+
+---
+
+## D12: N-HiTS from neuralforecast does not beat LightGBM; LightGBM stays the main model
+
+**Context.** This is step 4 of D2: a modern, off-the-shelf deep learning forecaster. N-HiTS was chosen over TFT because it is much faster to train on a CPU, and walk-forward evaluation needs about 9 refits per period and target.
+
+**Decision.**
+- **Setup:** `src/nhits.py`, `neuralforecast` 3.2.2. The model sees the same information as the LSTM (D11):
+  - the last 56 days of the target;
+  - past covariates: respiratory share, admissions, temperature, precipitation, and the episodes for the waiting-time model;
+  - the known calendar of the forecast days;
+  - `is_covid`.
+- **Settings:** L1 loss, `robust` scaling per window (handles the level shift), up to 1,000 steps with early stopping on the last 56 days of each training set.
+- **Walk-forward** through `NeuralForecast.cross_validation`: one origin per day, refit every 91 origins (about 3 months, as for the LSTM). For the last origins of the test period, the forecast days beyond the data are padded with the known calendar. They are never used as input or scored.
+- The default architecture is used and was not tuned.
+
+**Results** (MAE averaged over the five series, horizons 1–7):
+
+| Target | Period | Seasonal naive | LightGBM | LSTM | N-HiTS |
+|---|---|---|---|---|---|
+| Waiting time (min) | validation | 9.64 | **7.48** | 7.62 | 8.17 |
+| Waiting time (min) | test | 7.63 | **5.92** | 6.25 | 6.66 |
+| Episodes | validation | 307 | 238 | **235** | 273 |
+| Episodes | test | 278 | 219 | **216** | 249 |
+
+**Consequences.**
+- N-HiTS beats the seasonal naive (−10 % to −15 %) but comes last of the three models on both targets and both periods. Its likely handicaps are a network sized for long series, about 3,500 days per series, and per-window scaling that hides the level from the model, while LightGBM and the LSTM receive it explicitly through `base`.
+- **LightGBM stays the main model** for the waiting time. It is the most accurate, the fastest to train (seconds) and the easiest to explain. For episodes, the LSTM and LightGBM are tied.
+- TFT is not tried. It is heavier than N-HiTS and has the same data limitation, so it is unlikely to change the conclusion. Revisit if the data changes, for example with per-hospital series.
+- Next: average the forecasts of LightGBM and the LSTM (they err differently, D11) and close the comparison table.

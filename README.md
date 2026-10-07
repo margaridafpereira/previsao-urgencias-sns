@@ -26,6 +26,7 @@ src/features.py    features for the tabular models, one table per horizon
 src/lgbm.py        LightGBM, one global model per horizon, monthly walk-forward refit
 src/tune_lgbm.py   random hyperparameter search on validation, logged to MLflow (mlflow.db)
 src/lstm.py        LSTM in PyTorch, one global model for all 7 horizons, 3-monthly walk-forward refit
+src/nhits.py       N-HiTS from neuralforecast, same protocol
 notebooks/         analysis notebooks (01-eda: exploratory data analysis and key findings)
 data/raw/          downloaded datasets (Parquet, versioned in Git)
 tests/             tests
@@ -44,6 +45,7 @@ python -m src.ingest.meteo      # download daily weather per region into data/ra
 python -m src.baselines         # score the naive baselines (MAE per region and horizon)
 python -m src.lgbm              # LightGBM on validation (a few minutes); --test for the test period
 python -m src.lstm              # LSTM on validation (~7 min); --test for the test period
+python -m src.nhits             # N-HiTS on validation (~15 min); --test for the test period
 python -m src.tune_lgbm         # hyperparameter search (~30 min); browse with: mlflow ui --backend-store-uri sqlite:///mlflow.db
 python -m pytest -q             # run the tests
 ```
@@ -59,6 +61,7 @@ Test period (2025-01-01 onwards), mean absolute error over the five series, hori
 | Seasonal naive (same weekday last week) | 7.63 | 278 |
 | **LightGBM** (D9) | **5.92** | 219 |
 | LSTM (D11) | 6.25 | **216** |
+| N-HiTS (D12) | 6.66 | 249 |
 
 ## Roadmap
 
@@ -71,8 +74,8 @@ Test period (2025-01-01 onwards), mean absolute error over the five series, hori
 | 5 | LightGBM: −22 % MAE vs. seasonal naive on the test period (D9) | done |
 | 5b | Tune LightGBM hyperparameters, runs in MLflow: no meaningful gain, defaults kept (D10) | done |
 | 6 | LSTM written from scratch in PyTorch: beats naive, does not beat LightGBM (D11) | done |
-| 7 | N-HiTS or TFT | next |
-| 8 | Comparison table of all models on the test period | |
+| 7 | N-HiTS (neuralforecast): beats naive, last of the three models; TFT skipped (D12) | done |
+| 8 | Ensemble of LightGBM and LSTM, final comparison table | next |
 | 9 | Daily retraining and forecast in GitHub Actions, demo on Hugging Face Spaces | |
 
 ## Stack (all free)
