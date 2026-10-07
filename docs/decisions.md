@@ -150,3 +150,17 @@ The seasonal naive is the bar to beat. Per region on the test period: Norte 5.7,
 | Episodes | 278 | 179 | 237 | **219** | −21 % |
 
 Waiting time per region, horizons 1–7: Norte 4.2, Centro 6.4, Lisboa e Vale do Tejo 9.6, Alentejo 4.8, mainland Portugal 4.5. The gain on the test period is about the same as on validation (−22 %), so the model is not overfitted to the validation years.
+
+---
+
+## D10: Keep the default LightGBM hyperparameters
+
+**Context.** The D9 hyperparameters (`src/lgbm.py`, `PARAMS`) were reasonable defaults that had never been tuned. Tuning them was the obvious next improvement.
+
+**Decision.** A random search over 24 configurations was run on the validation period (`python -m src.tune_lgbm`, logged to MLflow in `mlflow.db`). It searched the learning rate, the number of leaves, the minimum data per leaf, the feature and bagging fractions, the L2 penalty and the number of rounds. To keep it fast, the search optimised the waiting time only and refitted every 3 months instead of every month.
+
+The best configuration reached 7.456 minutes, against 7.469 for the current one. That is a difference of 0.01 minutes, well within the noise. Most configurations scored between 7.46 and 7.55. Only the clearly underfitted ones were worse, for example a learning rate of 0.01 with 200 rounds scored 8.2. The current hyperparameters are kept.
+
+**Consequences.**
+- The model is not sensitive to its hyperparameters. The gains came from the features and from the relative target (D9), so further improvements should come from new information (for example weather forecasts, school holidays, or the Algarve episodes), not from tuning.
+- The search script and the MLflow log stay in the repository, so the search can be repeated after new features are added. `mlflow.db` is not versioned. To browse the runs: `mlflow ui --backend-store-uri sqlite:///mlflow.db`.

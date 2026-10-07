@@ -34,29 +34,51 @@ NUM_ROUNDS = 400
 TRAIN_STARTS = {"full_history": pd.Timestamp("2016-11-01"), "since_2022": pd.Timestamp("2022-01-01")}
 
 
-def forecast_horizon(table: pd.DataFrame, period, train_start: pd.Timestamp) -> pd.DataFrame:
+def forecast_horizon(
+    table: pd.DataFrame,
+    period,
+    train_start: pd.Timestamp,
+    params: dict | None = None,
+    num_rounds: int = NUM_ROUNDS,
+    refit_months: int = 1,
+) -> pd.DataFrame:
+    """Previsões walk-forward para um horizonte, com um novo treino a cada `refit_months` meses."""
+    params = PARAMS if params is None else params
     features = feature_columns(table)
     to_predict = table[in_period(table["target_date"], period)]
+    months = to_predict["target_date"].dt.to_period("M")
+    block = (months - months.min()).apply(lambda offset: offset.n // refit_months)
     frames = []
-    for month, rows in to_predict.groupby(to_predict["target_date"].dt.to_period("M")):
+    for _, rows in to_predict.groupby(block):
         first_origin = rows["origin"].min()
         train = table[
             (table["target_date"] <= first_origin)
             & (table["origin"] >= train_start)
             & table["y_rel"].notna()
         ]
-        model = lgb.train(PARAMS, lgb.Dataset(train[features], train["y_rel"]), NUM_ROUNDS)
+        model = lgb.train(params, lgb.Dataset(train[features], train["y_rel"]), num_rounds)
         rows = rows.copy()
         rows["y_pred"] = rows["base"] + model.predict(rows[features])
         frames.append(rows)
     return pd.concat(frames)
 
 
-def forecast(daily: pd.DataFrame, target: str, period, train_start: pd.Timestamp) -> pd.DataFrame:
+def build_tables(daily: pd.DataFrame, target: str) -> dict[int, pd.DataFrame]:
+    return {horizon: build_features(daily, target, horizon) for horizon in HORIZONS}
+
+
+def forecast(
+    daily: pd.DataFrame,
+    target: str,
+    period,
+    train_start: pd.Timestamp,
+    tables: dict[int, pd.DataFrame] | None = None,
+    **kwargs,
+) -> pd.DataFrame:
+    tables = build_tables(daily, target) if tables is None else tables
     frames = []
-    for horizon in HORIZONS:
-        table = build_features(daily, target, horizon)
-        result = forecast_horizon(table, period, train_start)
+    for horizon, table in tables.items():
+        result = forecast_horizon(table, period, train_start, **kwargs)
         result["horizon"] = horizon
         frames.append(result)
     forecasts = pd.concat(frames, ignore_index=True)

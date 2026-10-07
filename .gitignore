@@ -7,3 +7,4 @@ mlartifacts/
 .env
 models/*.pt
 models/*.pkl
+mlflow.db
