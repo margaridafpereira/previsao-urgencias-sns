@@ -24,6 +24,9 @@ jobs:
       - name: Descarregar dados do SNS
         run: python -m src.ingest.sns
 
+      - name: Descarregar meteorologia
+        run: python -m src.ingest.meteo
+
       - name: Testes
         run: python -m pytest -q
 

@@ -32,6 +32,7 @@ python -m venv .venv
 pip install -r requirements.txt
 
 python -m src.ingest.sns        # download the SNS datasets into data/raw/
+python -m src.ingest.meteo      # download daily weather per region into data/raw/meteo.parquet
 python -m pytest -q             # run the tests
 ```
 

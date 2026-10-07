@@ -58,10 +58,20 @@ Contains `urgencias_geral`, `urgencias_pediatricas`, `urgencia_obstetricia`, `ur
 
 ## 2. Weather: Open-Meteo
 
-- **Historical:** `https://archive-api.open-meteo.com/v1/archive`, daily data since 1940. Free for non-commercial use, no API key.
-- **Forecast:** `https://api.open-meteo.com/v1/forecast`, 7–16 days ahead. Required to make forecasts that use weather features.
-- Use one representative coordinate per region (its most populous district capital).
-- Candidate variables: `temperature_2m_max`, `temperature_2m_min`, `precipitation_sum`.
+- **Historical:** `https://archive-api.open-meteo.com/v1/archive`, daily data since 1940, available up to the previous day. Free for non-commercial use, no API key. This is what `src/ingest/meteo.py` uses.
+- **Forecast:** `https://api.open-meteo.com/v1/forecast`, 7–16 days ahead. Not collected yet; it will be needed at prediction time, when weather features have to come from a forecast.
+- **Output:** `data/raw/meteo.parquet`, one row per `periodo` × `ars`, from 2016-11-01. About 18,000 rows and 130 KB.
+- **Variables:** `temperature_2m_max`, `temperature_2m_min`, `temperature_2m_mean` (°C), `precipitation_sum` (mm). Days are aligned to `Europe/Lisbon`.
+
+One coordinate represents each region (see D5 in [decisions.md](decisions.md)). The `ars` values match the SNS dataset exactly, so the two join directly.
+
+| `ars` | City | Lat | Lon |
+|---|---|---|---|
+| ARS Norte | Porto | 41.1496 | −8.6110 |
+| ARS Centro | Coimbra | 40.2033 | −8.4103 |
+| ARS Lisboa e Vale do Tejo | Lisboa | 38.7223 | −9.1393 |
+| ARS Alentejo | Évora | 38.5714 | −7.9135 |
+| ARS Algarve | Faro | 37.0194 | −7.9304 |
 
 ## 3. Calendar
 

@@ -50,3 +50,18 @@ Each entry records the context, the decision and its consequences. Entries are n
 - (+) Simpler code, and retroactive SNS corrections are picked up automatically.
 - (+) The daily `git diff` shows whether past values were revised, which says something about data quality.
 - (−) Each daily commit rewrites files of about 1.8 MB, so after a year the Git history may reach a few hundred MB. If that becomes a problem, commit weekly instead or move to Hugging Face Datasets.
+
+The same rule applies to the weather data (`data/raw/meteo.parquet`), which Open-Meteo also revises for recent days.
+
+---
+
+## D5: One weather point per region, none for mainland Portugal
+
+**Context.** The SNS targets are regional aggregates, while weather is local. The options were a single city per region, an average over several points, or a population-weighted average.
+
+**Decision.** Use one city per region: the main urban centre, where most emergency visits happen (Porto, Coimbra, Lisboa, Évora, Faro). Do not download weather for the `Portugal Continental` series.
+
+**Consequences.**
+- (+) 5 API calls, simple to understand and to join on `ars`.
+- (−) Inland and mountain areas (Trás-os-Montes, Beira Interior) are not represented. Temperature anomalies tend to be regional, so the error should be small; revisit if weather features turn out to matter a lot.
+- When features are built, the `Portugal Continental` series will either get a population-weighted average of the five regions or be modelled without weather features.
