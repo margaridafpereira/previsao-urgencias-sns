@@ -14,6 +14,7 @@ Forecasts the **average waiting time** and the **number of emergency episodes** 
 |---|---|
 | [docs/data-sources.md](docs/data-sources.md) | Data sources, endpoints and fields |
 | [docs/decisions.md](docs/decisions.md) | Decision log and the reasoning behind each decision |
+| [docs/literature.md](docs/literature.md) | Literature review: models and predictors used for ED forecasting, and how this project compares |
 
 ## Project layout
 
