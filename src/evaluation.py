@@ -7,6 +7,8 @@ FORECAST_COLUMNS e são pontuados pela mesma função `score()`.
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import pandas as pd
 
 from src.data import REGIONS
@@ -22,6 +24,9 @@ VALIDATION = (pd.Timestamp("2023-01-01"), pd.Timestamp("2024-12-31"))
 TEST = (pd.Timestamp("2025-01-01"), None)
 
 FORECAST_COLUMNS = ["origin", "target_date", "horizon", "ars", "y_true", "y_pred"]
+
+# Previsões gravadas por cada modelo, para combinar modelos sem os voltar a treinar.
+FORECASTS_DIR = Path(__file__).resolve().parents[1] / "data" / "forecasts"
 
 
 def in_period(dates: pd.Series, period: tuple[pd.Timestamp, pd.Timestamp | None]) -> pd.Series:
@@ -52,3 +57,17 @@ def score(forecasts: pd.DataFrame, period: tuple[pd.Timestamp, pd.Timestamp | No
     table.loc["Média"] = table.mean()
     table.columns.name = "horizon"
     return table
+
+
+def forecast_path(model: str, target: str, test: bool) -> Path:
+    return FORECASTS_DIR / f"{model}_{target}_{'test' if test else 'validation'}.parquet"
+
+
+def save_forecasts(forecasts: pd.DataFrame, model: str, target: str, test: bool) -> None:
+    path = forecast_path(model, target, test)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    forecasts[FORECAST_COLUMNS].to_parquet(path, index=False)
+
+
+def load_forecasts(model: str, target: str, test: bool) -> pd.DataFrame:
+    return pd.read_parquet(forecast_path(model, target, test))

@@ -26,7 +26,7 @@ from neuralforecast.models import NHITS
 
 from src.baselines import seasonal_naive
 from src.data import load_daily
-from src.evaluation import FORECAST_COLUMNS, HORIZONS, TARGETS, TARGET_REGIONS, TEST, VALIDATION, actuals, score
+from src.evaluation import FORECAST_COLUMNS, HORIZONS, TARGETS, TARGET_REGIONS, TEST, VALIDATION, actuals, save_forecasts, score
 from src.features import COVID, _wide, calendar
 
 N_HORIZONS = len(HORIZONS)
@@ -142,7 +142,9 @@ def main() -> None:
     period, period_name = (TEST, "teste") if args.test else (VALIDATION, "validação")
     for target in TARGETS:
         naive = score(seasonal_naive(actuals(daily, target)), period)
-        table = score(forecast(daily, target, period), period)
+        forecasts = forecast(daily, target, period)
+        save_forecasts(forecasts, "nhits", target, args.test)
+        table = score(forecasts, period)
         print(f"\n{target} | nhits | {period_name}")
         print(table)
         gain = 1 - table.loc["Média", "1-7"] / naive.loc["Média", "1-7"]

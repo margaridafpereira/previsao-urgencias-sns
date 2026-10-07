@@ -16,7 +16,7 @@ import pandas as pd
 
 from src.baselines import seasonal_naive
 from src.data import load_daily
-from src.evaluation import FORECAST_COLUMNS, HORIZONS, TARGETS, TEST, VALIDATION, actuals, in_period, score
+from src.evaluation import FORECAST_COLUMNS, HORIZONS, TARGETS, TEST, VALIDATION, actuals, in_period, save_forecasts, score
 from src.features import build_features, feature_columns
 
 PARAMS = {
@@ -102,7 +102,10 @@ def main() -> None:
         print(f"\n{target} | seasonal_naive | {period_name}")
         print(naive)
         for start in starts:
-            table = score(forecast(daily, target, period, TRAIN_STARTS[start]), period)
+            forecasts = forecast(daily, target, period, TRAIN_STARTS[start])
+            if start == "full_history":
+                save_forecasts(forecasts, "lightgbm", target, args.test)
+            table = score(forecasts, period)
             print(f"\n{target} | lightgbm ({start}) | {period_name}")
             print(table)
             gain = 1 - table.loc["Média", "1-7"] / naive.loc["Média", "1-7"]

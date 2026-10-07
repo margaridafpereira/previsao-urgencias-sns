@@ -228,3 +228,27 @@ The best configuration reached 7.456 minutes, against 7.469 for the current one.
 - **LightGBM stays the main model** for the waiting time. It is the most accurate, the fastest to train (seconds) and the easiest to explain. For episodes, the LSTM and LightGBM are tied.
 - TFT is not tried. It is heavier than N-HiTS and has the same data limitation, so it is unlikely to change the conclusion. Revisit if the data changes, for example with per-hospital series.
 - Next: average the forecasts of LightGBM and the LSTM (they err differently, D11) and close the comparison table.
+
+---
+
+## D13: Average LightGBM and LSTM: use it for episodes, keep LightGBM alone for waiting time
+
+**Context.** LightGBM and the LSTM make different errors (D11): the LSTM loses more at horizon 1, LightGBM more at horizon 7. Averaging models with different errors often beats each of them.
+
+**Decision.**
+- **Method:** `src/ensemble.py` combines the saved forecasts (`data/forecasts/`, written by `src/lgbm.py` and `src/lstm.py`) as `w × LightGBM + (1 − w) × LSTM`. The weight `w` is chosen on the validation period from 0 to 1 in steps of 0.1, and then applied unchanged to the test period.
+- **Waiting time:** the best weight on validation is 0.6, giving 7.36 against 7.48 for LightGBM alone. On the test period the gain almost vanishes: 5.88 against 5.92 (−0.7 %). This is not worth running and maintaining a second model, so **LightGBM alone** stays the waiting-time model.
+- **Episodes:** the best weight is 0.5, giving 219.7 against 237.9 on validation. On the test period it scores **198.6 against 218.9 for LightGBM and 215.9 for the LSTM (−8 %)**, and it is better at every horizon (h=1: 170 vs. 179; h=7: 213 vs. 231). For episodes, **the 50/50 average** is the best model.
+
+**Results on the test period** (MAE averaged over the five series, horizons 1–7):
+
+| Model | Waiting time (min) | Episodes |
+|---|---|---|
+| Seasonal naive | 7.63 | 278 |
+| LightGBM | 5.92 | 219 |
+| LSTM | 6.25 | 216 |
+| N-HiTS | 6.66 | 249 |
+| LightGBM + LSTM | **5.88** (w = 0.6) | **199** (w = 0.5) |
+
+**Consequences.**
+- In production, the waiting-time forecast needs only LightGBM. The episode forecast needs both models, so the daily job also has to train the LSTM (about 30 seconds on a CPU). If that turns out to be a burden, falling back to LightGBM costs about 10 % in accuracy on episodes.

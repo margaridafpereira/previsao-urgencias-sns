@@ -8,3 +8,4 @@ mlartifacts/
 models/*.pt
 models/*.pkl
 mlflow.db
+data/forecasts/
