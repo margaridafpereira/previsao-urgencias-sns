@@ -164,3 +164,36 @@ The best configuration reached 7.456 minutes, against 7.469 for the current one.
 **Consequences.**
 - The model is not sensitive to its hyperparameters. The gains came from the features and from the relative target (D9), so further improvements should come from new information (for example weather forecasts, school holidays, or the Algarve episodes), not from tuning.
 - The search script and the MLflow log stay in the repository, so the search can be repeated after new features are added. `mlflow.db` is not versioned. To browse the runs: `mlflow ui --backend-store-uri sqlite:///mlflow.db`.
+
+---
+
+## D11: LSTM design: one global sequence model, all 7 horizons at once
+
+**Context.** This is step 3 of D2: an LSTM written from scratch in PyTorch, to check whether a sequence model beats LightGBM on these series.
+
+**Decision.**
+- **Input:** for each origin `t` and region, the last 56 days up to `t`. There are 14 channels per day:
+  - the target relative to `base` (the 28-day mean at `t`, as in D9);
+  - the episodes relative to their 28-day mean (waiting-time model only);
+  - the respiratory infection and admission shares;
+  - temperature and precipitation;
+  - weekday and day of the year as sine and cosine, holiday, day after a holiday, the Christmas window and `is_covid`.
+- **Known future:** the calendar of the 7 forecast days (weekday one-hot, holiday, day after a holiday, Christmas window) goes straight to the output head.
+- **Architecture:** a region embedding (size 4) is joined to every step. One LSTM layer with 64 units feeds an MLP head that outputs the 7 horizons at once. The loss is L1, with days that have no observed value masked out.
+- **Training:** Adam, learning rate 1e-3, batches of 256. Up to 60 epochs, with early stopping on the most recent 10 % of the training origins (patience 6).
+- **Walk-forward with a refit every 3 months**, not every month, because training a network takes about 25 seconds. For LightGBM the refit frequency made no difference (D10: 7.469 with a 3-month refit, 7.48 with a monthly one).
+- A test (`tests/test_lstm.py`) checks that the inputs at an origin do not change when every later value is changed.
+
+**Results** (MAE averaged over the five series, horizons 1–7, one training seed):
+
+| Target | Period | Seasonal naive | LightGBM | LSTM |
+|---|---|---|---|---|
+| Waiting time (min) | validation | 9.64 | **7.48** | 7.62 |
+| Waiting time (min) | test | 7.63 | **5.92** | 6.25 |
+| Episodes | validation | 307 | 238 | **235** |
+| Episodes | test | 278 | 219 | **216** |
+
+**Consequences.**
+- The LSTM clearly beats the seasonal naive (−18 % to −24 %), but it does not beat LightGBM. On the waiting time, the primary target, it is about 5 % worse on the test period. On episodes it is about 1 % better, which is within the noise of a single seed. With about 3,500 days per series this is the expected outcome, and it is the honest finding D2 asked for.
+- The LSTM loses more at horizon 1 (6.3 → 5.8 vs. 5.3 for LightGBM on the test period) and less at horizon 7. Its errors may therefore differ enough from LightGBM's for an average of the two to help.
+- Next: N-HiTS or TFT (step 7 in the README), then the comparison and possibly an ensemble.
