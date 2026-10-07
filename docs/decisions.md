@@ -252,3 +252,43 @@ The best configuration reached 7.456 minutes, against 7.469 for the current one.
 
 **Consequences.**
 - In production, the waiting-time forecast needs only LightGBM. The episode forecast needs both models, so the daily job also has to train the LSTM (about 30 seconds on a CPU). If that turns out to be a burden, falling back to LightGBM costs about 10 % in accuracy on episodes.
+
+---
+
+## D14: 80 % prediction intervals: quantile LightGBM with conformal calibration
+
+**Context.** A single number ("72 minutes tomorrow") does not say how sure the forecast is. Hospital managers need a range to plan for ("between 63 and 84"). Recent forecasting work also evaluates probabilistic forecasts, not only point forecasts.
+
+**Decision.**
+- **Quantile regression:** two extra LightGBM models per horizon, with the quantile loss at 10 % and 90 %. They use the same features and the same monthly walk-forward as the point model (D9). The interval adapts to conditions, so it is wider in winter and when flu is rising.
+- **Conformal calibration (CQR):** on the validation period, measure how far the actual values fall outside the interval. Widen (or narrow) each horizon by the margin that gives 80 % coverage, then apply that margin unchanged to the test period.
+- **Code:** `src/intervals.py`. The output is written to `data/forecasts/lightgbm_intervals_<target>_test.parquet`.
+
+**Results on the test period** (coverage: share of days whose actual value falls inside the interval; width: average high − low):
+
+| Target | Raw quantiles: coverage / width | Calibrated: coverage / width |
+|---|---|---|
+| Waiting time | 75.8 % / 17.3 min | **84.8 % / 20.9 min** |
+| Episodes | 76.6 % / 670 | **81.2 % / 716** |
+
+**Consequences.**
+- The raw quantiles are slightly too narrow (about 76 % for a promised 80 %), as quantile regression usually is. Calibration fixes this.
+- For the waiting time, calibration overshoots on the test period (85 %). The validation years (2023–2024) were more volatile than 2025–2026, so the margin learnt there is a little too generous. That is the safe side for planning. Recalibrating on recent data in production would bring it closer to 80 %.
+- Calibrated coverage per region ranges from 80 % (Lisboa e Vale do Tejo) to 88 % (Alentejo, Norte). The average width is 21 minutes for an average wait of about 70 minutes.
+- The published forecast will show the calibrated interval.
+
+---
+
+## D15: Every evaluation is logged to MLflow
+
+**Context.** MLflow was first used only for the LightGBM hyperparameter search (D10). The other models were reported only in the terminal and in this log, which made them hard to compare.
+
+**Decision.**
+- `src/tracking.py`, `record()`: every model (baselines, LightGBM, LSTM, N-HiTS, ETS, SARIMAX, ensemble) calls it at the end of an evaluation.
+- It saves the forecasts to `data/forecasts/` and creates a run in the `model-comparison` experiment of `mlflow.db`, with tags `model`, `target` and `period`.
+- It logs the MAE for horizons 1–7, per horizon and per region.
+- `python -m src.tracking` logs again every forecast already saved.
+
+**Consequences.**
+- All models can be compared in the MLflow UI (`mlflow ui --backend-store-uri sqlite:///mlflow.db`, **Model training** mode, experiment `model-comparison`).
+- `mlflow.db` and `data/forecasts/` are not versioned, because they are reproducible from the code. The numbers that matter are kept in this log and in the README.

@@ -23,8 +23,9 @@ from torch import nn
 
 from src.baselines import seasonal_naive
 from src.data import load_daily
-from src.evaluation import FORECAST_COLUMNS, HORIZONS, TARGETS, TARGET_REGIONS, TEST, VALIDATION, actuals, save_forecasts, score
+from src.evaluation import FORECAST_COLUMNS, HORIZONS, TARGETS, TARGET_REGIONS, TEST, VALIDATION, actuals, score
 from src.features import BASE_WINDOW, COVID, _wide, calendar
+from src.tracking import record
 
 WINDOW = 56
 N_HORIZONS = len(HORIZONS)
@@ -221,7 +222,7 @@ def main() -> None:
     for target in TARGETS:
         naive = score(seasonal_naive(actuals(daily, target)), period)
         forecasts = forecast(daily, target, period)
-        save_forecasts(forecasts, "lstm", target, args.test)
+        record(forecasts, "lstm", target, args.test)
         table = score(forecasts, period)
         print(f"\n{target} | lstm | {period_name}")
         print(table)

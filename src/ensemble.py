@@ -13,6 +13,7 @@ import numpy as np
 import pandas as pd
 
 from src.evaluation import FORECAST_COLUMNS, TARGETS, TEST, VALIDATION, load_forecasts, score
+from src.tracking import record
 
 MODELS = ("lightgbm", "lstm")
 WEIGHTS = np.round(np.arange(0, 1.01, 0.1), 1)  # peso do LightGBM; o resto vai para a LSTM
@@ -41,6 +42,8 @@ def main() -> None:
             name="MAE validação",
         )
         best = curve.idxmin()
+        record(combine(*validation.values(), best), "ensemble", target, False, {"lightgbm_weight": best})
+        record(combine(*test.values(), best), "ensemble", target, True, {"lightgbm_weight": best})
         print(f"\n{target}: MAE na validação por peso do LightGBM")
         print(curve.to_frame().T.to_string())
 

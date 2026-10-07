@@ -29,6 +29,7 @@ src/lstm.py        LSTM in PyTorch, one global model for all 7 horizons, 3-month
 src/nhits.py       N-HiTS from neuralforecast, same protocol
 src/ensemble.py    weighted average of saved LightGBM and LSTM forecasts (data/forecasts/)
 src/intervals.py   80 % prediction intervals: quantile LightGBM + conformal calibration
+src/tracking.py    saves forecasts and logs every evaluation to MLflow (experiment model-comparison)
 notebooks/         analysis notebooks (01-eda: exploratory data analysis and key findings)
 data/raw/          downloaded datasets (Parquet, versioned in Git)
 tests/             tests
@@ -83,7 +84,8 @@ Chosen models: LightGBM alone for waiting time (the average gains only 0.7 %), a
 | 6 | LSTM written from scratch in PyTorch: beats naive, does not beat LightGBM (D11) | done |
 | 7 | N-HiTS (neuralforecast): beats naive, last of the three models; TFT skipped (D12) | done |
 | 8 | Ensemble of LightGBM and LSTM, final comparison table (D13) | done |
-| 8b | 80 % prediction intervals: quantile LightGBM with conformal calibration (D14) | next |
+| 8b | 80 % prediction intervals: quantile LightGBM with conformal calibration, 85 % / 81 % coverage on test (D14) | done |
+| 8c | Every evaluation logged to MLflow (D15) | done |
 | 9 | Daily retraining and forecast in GitHub Actions, demo on Hugging Face Spaces | |
 
 ## Stack (all free)

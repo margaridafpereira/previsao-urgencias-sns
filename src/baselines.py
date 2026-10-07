@@ -15,7 +15,8 @@ from __future__ import annotations
 import pandas as pd
 
 from src.data import load_daily
-from src.evaluation import FORECAST_COLUMNS, HORIZONS, TARGETS, TEST, VALIDATION, actuals, score
+from src.evaluation import FORECAST_COLUMNS, HORIZONS, TARGETS, TEST, VALIDATION, actuals, in_period, score
+from src.tracking import record
 
 
 def _forecast(observed: pd.DataFrame, lag_for_horizon) -> pd.DataFrame:
@@ -26,7 +27,7 @@ def _forecast(observed: pd.DataFrame, lag_for_horizon) -> pd.DataFrame:
     history = observed.ffill()
     frames = []
     for horizon in HORIZONS:
-        predicted = history.shift(lag_for_horizon(horizon))  # indexado pela origem
+        predicted = history.shift(lag_for_horizon(horizon))  
         frame = predicted.stack().rename("y_pred").reset_index()
         frame.columns = ["origin", "ars", "y_pred"]
         frame["horizon"] = horizon
@@ -57,9 +58,10 @@ def main() -> None:
         observed = actuals(daily, target)
         for name, baseline in BASELINES.items():
             forecasts = baseline(observed)
-            for period_name, period in [("validação", VALIDATION), ("teste", TEST)]:
+            for test, period_name, period in [(False, "validação", VALIDATION), (True, "teste", TEST)]:
                 print(f"\n{target} | {name} | {period_name}: MAE por região e horizonte")
                 print(score(forecasts, period))
+                record(forecasts[in_period(forecasts["target_date"], period)], name, target, test)
 
 
 if __name__ == "__main__":

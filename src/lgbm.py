@@ -16,8 +16,9 @@ import pandas as pd
 
 from src.baselines import seasonal_naive
 from src.data import load_daily
-from src.evaluation import FORECAST_COLUMNS, HORIZONS, TARGETS, TEST, VALIDATION, actuals, in_period, save_forecasts, score
+from src.evaluation import FORECAST_COLUMNS, HORIZONS, TARGETS, TEST, VALIDATION, actuals, in_period, score
 from src.features import build_features, feature_columns
+from src.tracking import record
 
 PARAMS = {
     "objective": "l1",  # otimiza diretamente o MAE
@@ -104,7 +105,7 @@ def main() -> None:
         for start in starts:
             forecasts = forecast(daily, target, period, TRAIN_STARTS[start])
             if start == "full_history":
-                save_forecasts(forecasts, "lightgbm", target, args.test)
+                record(forecasts, "lightgbm", target, args.test)
             table = score(forecasts, period)
             print(f"\n{target} | lightgbm ({start}) | {period_name}")
             print(table)
