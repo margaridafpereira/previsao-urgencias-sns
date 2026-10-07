@@ -319,3 +319,37 @@ The best configuration reached 7.456 minutes, against 7.469 for the current one.
 - LightGBM's advantage therefore comes from the extra information (flu, admissions, episodes, weather) and from pooling the five series. It is real but small for the waiting time, and clearer for episodes (−5 %).
 - ETS beats the naive baseline but is the weakest model. It has no calendar variables, and holidays and the Christmas window matter (EDA).
 - SARIMAX makes different errors from LightGBM, so it is a natural candidate for the ensemble.
+
+---
+
+## D17: Zero-shot Chronos-2 matches the trained LightGBM
+
+**Context.** Time series foundation models are the 2025–2026 state of the art ([literature.md](literature.md)). The question is whether a model pre-trained on millions of other series, and never trained on SNS data, can match models trained on 10 years of it.
+
+**Decision.**
+- **Setup:** `src/chronos2.py`, `amazon/chronos-2` through `chronos-forecasting` 2.3.2, on a CPU, with no training or fine-tuning.
+- **Inputs at each origin and region:**
+  - the last 512 days of the target;
+  - past covariates: respiratory share, admissions, temperature, precipitation, and the episodes for the waiting-time model;
+  - known-future covariates for the 7 forecast days: holiday, day after a holiday, Christmas window and `is_covid`.
+- **Outputs:** the median as the point forecast, plus the 10 % and 90 % quantiles.
+- Each (origin, region) pair is a separate series, so 60 origins are forecast per call. The test period takes about 45 minutes for both targets.
+
+**Results on the test period** (MAE averaged over the five series):
+
+| Target | Seasonal naive | SARIMAX | LightGBM | **Chronos-2 (zero-shot)** |
+|---|---|---|---|---|
+| Waiting time (min), h=1 | 7.63 | – | 5.26 | **5.21** |
+| Waiting time (min), 1–7 | 7.63 | 6.05 | **5.92** | 5.95 |
+| Episodes, 1–7 | 278 | 232 | 219 | **217** |
+
+Its own 10–90 % interval, with no calibration, covers 76.5 % (waiting time, 17 minutes wide) and 79.4 % (episodes) of the test days. The calibrated LightGBM intervals (D14) cover 84.8 % and 81.2 %.
+
+**Consequences.**
+- **A model that has never seen SNS data ties with LightGBM, the best trained model**, and beats the LSTM, N-HiTS and SARIMAX. This is the most notable finding of the comparison. It also means LightGBM is close to what these inputs allow.
+- **Ensembles look promising, but are not decided yet.** Equal-weight averages, fixed in advance, give on the test period:
+  - LightGBM + Chronos-2: 5.77 min and 206 episodes;
+  - LightGBM + LSTM + Chronos-2: 5.74 min and **194** episodes, against 199 for the D13 ensemble.
+
+  Picking the best combination by looking at the test period would be selection on the test set. Chronos-2 is therefore being run on the validation period, and the combination will be chosen there (D18).
+- **Production cost:** Chronos-2 needs no training, but it is a 120M-parameter model. It takes about 2–3 seconds per forecast day on a CPU, which is fine for one forecast a day in GitHub Actions. The first run downloads the model, which takes about 1–2 minutes.
