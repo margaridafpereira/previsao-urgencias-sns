@@ -115,3 +115,38 @@ The same rule applies to the weather data (`data/raw/meteo.parquet`), which Open
 | **seasonal naive** (same weekday last week) | 9.6 | **9.6** | 7.6 | **7.6** |
 
 The seasonal naive is the bar to beat. Per region on the test period: Norte 5.7, Centro 7.9, Lisboa e Vale do Tejo 12.2, Alentejo 6.2, mainland Portugal 6.1.
+
+---
+
+## D9: LightGBM design: one global model per horizon, relative target, no future weather
+
+**Context.** This is the first model to try to beat the seasonal naive (D2, D8). Several choices are not obvious: one model per series or one for all of them, how to cope with the post-COVID level shift (trees cannot predict values outside the range they were trained on), and which information may be used at forecast time.
+
+**Decision.**
+- **One global model** for all five series, with the region as a categorical feature, and **one model per horizon** (7 models). Each horizon has its own lag features (for example the same weekday last week is `t + h - 7`).
+- **Relative target:** the model predicts `y(t + h) − base`, where `base` is the mean of the last 28 days. The lags are expressed relative to `base` too. The level comes from recent data, and the trees learn only the deviations.
+- **Features** (`src/features.py`), all known at the origin `t`:
+  - 14 daily lags, the same weekday 1 and 2 weeks back, the 7-day mean and the 28-day standard deviation;
+  - the episodes relative to their 28-day mean;
+  - the respiratory infection share and its 7-day change, and the admission share;
+  - weather as 3-day means up to `t`; mainland Portugal uses the average of the regions (D5);
+  - `is_covid` (D6).
+- **Calendar of the forecast day** (weekday, day of the year, holiday, day after a holiday, 24 Dec to 5 Jan window): this is the only future information allowed, because it is known in advance.
+- **No weather for the forecast day.** Using the observed weather would be an unfair advantage, because in production only a weather forecast exists. Open-Meteo's historical forecasts could be used later to test this properly.
+- **Loss:** L1, which optimises the MAE directly.
+- **Walk-forward with a monthly refit:** each month is forecast by a model trained only on days whose value was known at that month's first origin.
+- **Training start:** the full history beat training on 2022 onwards on the validation period (7.48 vs. 7.85 minutes; 238 vs. 257 episodes). The full history is kept, which closes the experiment from D6.
+
+**Consequences.**
+- (+) No leakage: a test (`tests/test_features.py`) changes every value after the origin and checks that the features at the origin stay the same.
+- (−) Evaluation takes a few minutes, because it fits about 7 × 24 models per period.
+- Hyperparameters are not tuned yet (`src/lgbm.py`, `PARAMS`). Tuning on the validation period is the obvious next improvement.
+
+**Results on the test period** (`python -m src.lgbm --test`, from 2025-01-01, MAE averaged over the five series):
+
+| Target | Seasonal naive | LightGBM, h=1 | LightGBM, h=7 | LightGBM, 1–7 | Gain |
+|---|---|---|---|---|---|
+| Waiting time (min) | 7.6 | 5.3 | 6.2 | **5.9** | −22 % |
+| Episodes | 278 | 179 | 237 | **219** | −21 % |
+
+Waiting time per region, horizons 1–7: Norte 4.2, Centro 6.4, Lisboa e Vale do Tejo 9.6, Alentejo 4.8, mainland Portugal 4.5. The gain on the test period is about the same as on validation (−22 %), so the model is not overfitted to the validation years.

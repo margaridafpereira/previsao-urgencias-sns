@@ -6,3 +6,4 @@ holidays==0.106
 matplotlib==3.11.2
 statsmodels==0.15.0
 jupyter==1.1.1
+lightgbm==4.7.0
