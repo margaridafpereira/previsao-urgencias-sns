@@ -88,3 +88,30 @@ The same rule applies to the weather data (`data/raw/meteo.parquet`), which Open
 **Decision.** Forecast five series: Norte, Centro, Lisboa e Vale do Tejo, Alentejo and mainland Portugal. Keep the Algarve in the raw data and in the analysis. Its episode counts, which are complete, can still be used as a feature.
 
 **Consequences.** The published forecast will not cover the Algarve. Revisit if the SNS resumes publishing its waiting time consistently; the daily data collection will show it.
+
+---
+
+## D8: Evaluation protocol: forecast origin, horizons, splits and metric
+
+**Context.** D2 requires every model to be evaluated on the same walk-forward split, and D6 says to evaluate only on data from 2023 onwards. Without one shared definition, each model would end up scored slightly differently.
+
+**Decision.**
+- **Forecast origin:** on day `t`, a model may use only data up to and including `t`, and it forecasts `t + 1` to `t + 7` (horizons 1 to 7). Every day is an origin, so this is walk-forward by construction.
+- **Targets:** `wait_minutes` (primary) and `episodes` (secondary), for the five series from D7.
+- **Periods**, by the date being forecast: validation from 2023-01-01 to 2024-12-31, used to choose features and hyperparameters; test from 2025-01-01 onwards, used only to compare finished models.
+- **Metric:** MAE per region and horizon, averaged over the five series. Days with no observed value (for example the 2025-06-24 to 2025-07-04 gap) are not scored.
+- **Gaps in the inputs** are forward-filled with the last known value, so every model always produces a forecast.
+- **Code:** `src/evaluation.py` (constants and `score()`). Every model returns the same forecast table (`origin`, `target_date`, `horizon`, `ars`, `y_true`, `y_pred`).
+
+**Consequences.**
+- (+) Models are compared like for like, per horizon.
+- (−) Forecasts are made as if the data for day `t` were already available on day `t`. In practice the SNS publishes with a delay of a few days. The real horizon is therefore longer, and this has to be handled when the forecast is put into production.
+
+**Baselines** (`python -m src.baselines`), MAE in minutes, average over the five series:
+
+| Model | Validation, h=1 | Validation, 1–7 | Test, h=1 | Test, 1–7 |
+|---|---|---|---|---|
+| last value (yesterday) | 9.3 | 10.8 | 7.6 | 9.0 |
+| **seasonal naive** (same weekday last week) | 9.6 | **9.6** | 7.6 | **7.6** |
+
+The seasonal naive is the bar to beat. Per region on the test period: Norte 5.7, Centro 7.9, Lisboa e Vale do Tejo 12.2, Alentejo 6.2, mainland Portugal 6.1.
