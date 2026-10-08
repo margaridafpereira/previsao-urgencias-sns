@@ -33,6 +33,10 @@ src/intervals.py   80 % prediction intervals: quantile LightGBM + conformal cali
 src/tracking.py    saves forecasts and logs every evaluation to MLflow (experiment model-comparison)
 src/statistical.py ETS and SARIMAX per series (statsmodels)
 src/chronos2.py    Chronos-2 foundation model, zero-shot with covariates
+src/predict.py     daily forecast: four-model average, 14 days, 80 % interval (data/predictions/)
+src/export_site.py data for the public page (site/data/)
+src/regions.py     which regions have recent data (D19)
+site/              public page, published on GitHub Pages by the predict workflow
 notebooks/         analysis notebooks (01-eda: exploratory data analysis and key findings)
 data/raw/          downloaded datasets (Parquet, versioned in Git)
 tests/             tests
@@ -53,6 +57,8 @@ python -m src.lgbm              # LightGBM on validation (a few minutes); --test
 python -m src.lstm              # LSTM on validation (~7 min); --test for the test period
 python -m src.nhits             # N-HiTS on validation (~15 min); --test for the test period
 python -m src.statistical       # ETS and SARIMAX on validation (~20 min); --test for the test period
+python -m src.predict           # today's forecast (~8 min)
+python -m src.export_site       # page data; then open site/index.html through a local server
 python -m src.chronos2          # Chronos-2 zero-shot on validation (~1 h on CPU); --test for the test period
 python -m src.ensemble          # combine saved forecasts (run lgbm and lstm, with and without --test, first)
 python -m src.intervals         # prediction intervals (~25 min)
@@ -64,21 +70,20 @@ Run the commands from the repository root.
 
 ## Results so far
 
-Test period (2025-01-01 onwards), mean absolute error over the five series, horizons 1 to 7 days. Lower is better.
+Test period (2025-01-01 onwards), mean absolute error over the five series. Horizons count from the latest day published by the SNS. Lower is better.
 
-| Model | Waiting time (min) | Episodes per day |
-|---|---|---|
-| Seasonal naive (same weekday last week) | 7.63 | 278 |
-| ETS (D16) | 6.87 | 249 |
-| N-HiTS (D12) | 6.66 | 249 |
-| LSTM written from scratch (D11) | 6.25 | 216 |
-| SARIMAX with calendar (D16) | 6.05 | 232 |
-| Chronos-2, zero-shot, never trained on SNS data (D17) | 5.95 | 217 |
-| LightGBM (D9) | 5.92 | 219 |
-| Average of LightGBM and LSTM (D13) | 5.88 | 199 |
-| **Average of LightGBM, LSTM, SARIMAX and Chronos-2** (D18) | **5.69** | **195** |
+| Model | Waiting time (min), 1–7 days | 8–14 days | Episodes per day, 1–7 days | 8–14 days |
+|---|---|---|---|---|
+| Seasonal naive (same weekday, latest known week) | 7.63 | 8.76 | 278 | 366 |
+| ETS (D16) | 6.87 | – | 249 | – |
+| N-HiTS (D12) | 6.66 | – | 249 | – |
+| LSTM written from scratch (D11, D22) | 6.34 | 6.96 | 226 | 269 |
+| SARIMAX with calendar (D16) | 6.05 | 6.97 | 231 | 310 |
+| Chronos-2, zero-shot, never trained on SNS data (D17) | 5.93 | 6.68 | 216 | 282 |
+| LightGBM (D9) | 5.92 | 6.61 | 219 | 277 |
+| **Average of LightGBM, LSTM, SARIMAX and Chronos-2** (D18, D22) | **5.73** | **6.40** | **199** | **256** |
 
-The four-model equal-weight average was chosen on the validation period and confirmed on the test period. It improves on the best single model by 4 % (waiting time) and 11 % (episodes).
+The four-model equal-weight average was chosen on the validation period and confirmed on the test period. ETS and N-HiTS were evaluated at 1–7 days only.
 
 ## Roadmap
 
@@ -99,8 +104,9 @@ The four-model equal-weight average was chosen on the validation period and conf
 | 8e | Zero-shot foundation model Chronos-2: ties with LightGBM (D17) | done |
 | 8f | Final ensemble chosen on validation: four-model average (D18) | done |
 | 9 | Publication delay: measured daily (D20); 7-day horizon kept, delay shown openly, 14 days as an option (D21) | done |
-| 10 | Daily forecast in GitHub Actions; demo on Hugging Face Spaces | next |
-| — | Later: school holidays, weather forecasts, 14-day horizon, hierarchical reconciliation | optional |
+| 10 | 14-day horizon and daily forecast in GitHub Actions (D22) | done |
+| 11 | Public page on GitHub Pages, updated daily (D23) | done |
+| — | Later: school holidays, weather forecasts, hierarchical reconciliation, results notebook | optional |
 
 ## Stack (all free)
 

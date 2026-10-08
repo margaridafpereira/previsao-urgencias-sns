@@ -9,3 +9,4 @@ models/*.pt
 models/*.pkl
 mlflow.db
 data/forecasts/
+site/data/forecast.json

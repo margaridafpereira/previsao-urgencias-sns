@@ -432,3 +432,53 @@ The delay decides which horizons the published forecast really needs. If the lat
 **Consequences.**
 - On a typical day the forecast covers today plus about 2 days. Its usefulness depends on how often and how late the SNS publishes, which the log will show.
 - The published accuracy stays the one measured for horizons 1–7 (D18). It is not reduced to the subset of horizons that are still in the future.
+
+---
+
+## D22: 14-day horizon and the daily published forecast
+
+**Context.** The demo needs to show a full week ahead despite the SNS publication delay of about 5 days (D20). D21 kept 7 days. The user then asked for a "show 14 days" option in the demo, which needs models that forecast 14 days.
+
+**Decision.**
+- **Horizon:** `evaluation.HORIZONS` runs from 1 to 14. For horizons 8–14, the same-weekday lags and the seasonal naive use the most recent week already known at the origin (2 weeks back instead of 1). `score()` reports 1–7, comparable with every earlier result, and 8–14 separately. LightGBM, the LSTM, SARIMAX and Chronos-2 were evaluated again on both periods.
+- **Model:** the four-model equal-weight average (D18) is kept for both targets and both horizon ranges.
+- **Daily forecast:** `src/predict.py` takes the latest published day as the origin. It trains LightGBM, the LSTM and SARIMAX on all data up to that day, runs Chronos-2 zero-shot, and averages the four over 14 days. It adds the calibrated LightGBM interval (D14; margins in `data/interval_margins.json`), widened if needed so it always contains the average. Days before today that the SNS has not published are labelled `not_yet_published` (D21). Each run is saved to `data/predictions/<date>.parquet` and `latest.parquet`, so that past forecasts can later be compared with what the SNS publishes.
+- **Regions:** the models take the region list as a parameter, and `predict.py` uses the five evaluation series plus every active region (D19).
+- **Automation:** the `predict.yml` workflow runs after the daily collection. It installs a CPU-only stack (`requirements-predict.txt`), caches the Chronos-2 weights, commits the forecast and publishes the site (D23). One run takes about 8 minutes on a laptop CPU.
+
+**Results** (MAE averaged over the five series; best combinations ranked on validation by the mean of 1–7 and 8–14):
+
+| Model | Waiting time 1–7 / 8–14, validation | Waiting time 1–7 / 8–14, test | Episodes 1–7 / 8–14, validation | Episodes 1–7 / 8–14, test |
+|---|---|---|---|---|
+| Seasonal naive | 9.64 / 10.82 | 7.63 / 8.76 | 307 / 387 | 278 / 366 |
+| LightGBM | 7.48 / 8.35 | 5.92 / 6.61 | 238 / 295 | 219 / 277 |
+| LSTM (14 outputs) | 7.57 / 8.33 | 6.34 / 6.96 | 256 / 305 | 226 / 269 |
+| SARIMAX | 7.63 / 8.65 | 6.05 / 6.97 | 249 / 325 | 231 / 310 |
+| Chronos-2 | 7.55 / 8.64 | 5.93 / 6.68 | 248 / 326 | 216 / 282 |
+| **Four-model average** | **7.17 / 8.04** (best) | **5.73 / 6.40** | 222 / 284 (4th, 1.2 % behind the best) | **199 / 256** |
+
+**Consequences.**
+- The second week costs little for the waiting time (+0.7 min, +12 %) and more for episodes (+29 %).
+- With 14 outputs the LSTM is slightly worse at 1–7 days than in D11 (6.34 vs. 6.25 minutes; 226 vs. 216 episodes), but the four-model average is almost unchanged (5.73 vs. 5.69 minutes; 199 vs. 195 episodes).
+- The Algarve's episode forecast is published, but its accuracy is unknown, because the Algarve was never part of the evaluation. The site says so.
+
+---
+
+## D23: The public page is a static site on GitHub Pages
+
+**Context.** The plan was a Gradio demo on Hugging Face Spaces, but huggingface.co is not reachable from the user's network. The forecast changes once a day, so it does not need a live server.
+
+**Decision.**
+- `site/index.html`: one static page, in Portuguese, with no external libraries. It reads `site/data/forecast.json` (written by `src/export_site.py` from the latest prediction) and `site/data/accuracy.json` (test-period error of the four-model average, per region, written by `python -m src.export_site --accuracy` and versioned).
+- The page shows, per indicator and region:
+  - the forecast for today with its 80 % interval, compared with "normal for the season" (the mean of the same days, ± 7, in 2023–2025);
+  - the latest official value and the publication delay;
+  - a chart of the last 4 weeks of official data, with the forecast, the interval, the seasonal normal and the not-yet-published days shaded;
+  - the next 7 days by default and a "up to 14 days" button;
+  - a table view, the measured error, inactive regions with the date of their last value, and a medical disclaimer (112, SNS 24).
+- **Publishing:** the `predict.yml` workflow publishes with `actions/deploy-pages` after each forecast. It does not rely on a commit triggering Pages, because pushes made by `GITHUB_TOKEN` do not trigger other workflows.
+- Checked in light mode, dark mode and at 390 px width.
+
+**Consequences.**
+- There is no extra account or service, and nothing to wake up: the page loads instantly and costs nothing.
+- The page cannot recompute anything on demand. If the daily workflow fails, the page keeps the last forecast and shows a warning when it is more than 2 days old.

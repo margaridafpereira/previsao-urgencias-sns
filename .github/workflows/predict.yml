@@ -7,7 +7,13 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: write   # commit da previsão
+  pages: write      # publicar a página
+  id-token: write   # exigido pela publicação no GitHub Pages
+
+concurrency:
+  group: previsao
+  cancel-in-progress: false
 
 jobs:
   predict:
@@ -15,6 +21,9 @@ jobs:
     if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     timeout-minutes: 45
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -52,3 +61,16 @@ jobs:
             git pull --rebase
             git push
           fi
+
+      - name: Dados da página
+        run: python -m src.export_site
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+      - name: Publicar a página
+        id: deploy
+        uses: actions/deploy-pages@v4
