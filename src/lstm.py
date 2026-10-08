@@ -41,10 +41,11 @@ EARLY_STOP_FRACTION = 0.1  # as origens mais recentes do treino servem para para
 class Dataset:
     """Arrays por dia e região, mais o calendário, prontos a cortar em janelas."""
 
-    def __init__(self, daily: pd.DataFrame, target: str):
-        y = _wide(daily, target)
+    def __init__(self, daily: pd.DataFrame, target: str, regions: list[str] = TARGET_REGIONS):
+        self.regions = list(regions)
+        y = _wide(daily, target, regions)
         self.dates = y.index
-        self.observed = daily.pivot(index="periodo", columns="ars", values=target).asfreq("D")[TARGET_REGIONS]
+        self.observed = daily.pivot(index="periodo", columns="ars", values=target).asfreq("D").reindex(columns=regions)
         self.observed = self.observed.reindex(self.dates).to_numpy()
         self.y = y.to_numpy()
         self.base = y.rolling(BASE_WINDOW, min_periods=7).mean().to_numpy()
@@ -52,12 +53,12 @@ class Dataset:
         # Covariáveis diárias (dia, região, canal), já em escalas próximas de 0-1.
         channels = []
         if target != "episodes":
-            episodes = _wide(daily, "episodes")
+            episodes = _wide(daily, "episodes", regions)
             channels.append((episodes / episodes.rolling(BASE_WINDOW).mean() - 1).to_numpy())
-        channels.append(_wide(daily, "respiratory_pct").to_numpy() / 10)
-        channels.append(_wide(daily, "admission_pct").to_numpy() / 10)
-        channels.append((_wide(daily, "temperature_2m_mean").to_numpy() - 15) / 8)
-        channels.append(np.log1p(_wide(daily, "precipitation_sum").to_numpy()) / 3)
+        channels.append(_wide(daily, "respiratory_pct", regions).to_numpy() / 10)
+        channels.append(_wide(daily, "admission_pct", regions).to_numpy() / 10)
+        channels.append((_wide(daily, "temperature_2m_mean", regions).to_numpy() - 15) / 8)
+        channels.append(np.log1p(_wide(daily, "precipitation_sum", regions).to_numpy()) / 3)
         cal = calendar(self.dates)
         per_day = np.stack(
             [
@@ -72,7 +73,7 @@ class Dataset:
             ],
             axis=1,
         )
-        n_regions = len(TARGET_REGIONS)
+        n_regions = len(regions)
         channels += [np.repeat(per_day[:, [k]], n_regions, axis=1) for k in range(per_day.shape[1])]
         self.covariates = np.nan_to_num(np.stack(channels, axis=2)).astype(np.float32)
 
@@ -94,7 +95,7 @@ class Dataset:
 
         Devolve x (N, WINDOW, canais), future (N, 7 * 10), region (N,), y (N, 7), base (N,).
         """
-        n_regions = len(TARGET_REGIONS)
+        n_regions = len(self.regions)
         base = self.base[origins]  # (O, R)
         windows = sliding_window_view(self.y, WINDOW, axis=0)[origins - WINDOW + 1]  # (O, R, W)
         y_in = windows / base[:, :, None] - 1
@@ -150,7 +151,7 @@ def train(data: Dataset, origins: np.ndarray, seed: int = 42) -> Net:
     fit_x, fit_f, fit_r, fit_y, _ = data.samples(origins[:-n_stop])
     stop_x, stop_f, stop_r, stop_y, _ = data.samples(origins[-n_stop:])
 
-    model = Net(data.n_channels, fit_f.shape[1], len(TARGET_REGIONS))
+    model = Net(data.n_channels, fit_f.shape[1], len(data.regions))
     optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE)
     best_loss, best_state, bad_epochs = float("inf"), None, 0
     generator = torch.Generator().manual_seed(seed)
@@ -196,14 +197,14 @@ def forecast(daily: pd.DataFrame, target: str, period) -> pd.DataFrame:
         x, future, region, y_rel, base = data.samples(to_predict)
         with torch.no_grad():
             predicted = model(x, future, region).numpy()
-        n_regions = len(TARGET_REGIONS)
+        n_regions = len(data.regions)
         origins = np.repeat(dates[to_predict], n_regions)
         for h in range(N_HORIZONS):
             frames.append(pd.DataFrame({
                 "origin": origins,
                 "target_date": origins + pd.Timedelta(days=h + 1),
                 "horizon": h + 1,
-                "ars": np.tile(TARGET_REGIONS, len(to_predict)),
+                "ars": np.tile(data.regions, len(to_predict)),
                 "y_true": base * (1 + y_rel[:, h].numpy()),
                 "y_pred": base * (1 + predicted[:, h]),
             }))

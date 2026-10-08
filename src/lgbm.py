@@ -16,7 +16,7 @@ import pandas as pd
 
 from src.baselines import seasonal_naive
 from src.data import load_daily
-from src.evaluation import FORECAST_COLUMNS, HORIZONS, TARGETS, TEST, VALIDATION, actuals, in_period, score
+from src.evaluation import FORECAST_COLUMNS, HORIZONS, TARGET_REGIONS, TARGETS, TEST, VALIDATION, actuals, in_period, score
 from src.features import build_features, feature_columns
 from src.tracking import record
 
@@ -64,8 +64,10 @@ def forecast_horizon(
     return pd.concat(frames)
 
 
-def build_tables(daily: pd.DataFrame, target: str) -> dict[int, pd.DataFrame]:
-    return {horizon: build_features(daily, target, horizon) for horizon in HORIZONS}
+def build_tables(
+    daily: pd.DataFrame, target: str, regions: list[str] = TARGET_REGIONS
+) -> dict[int, pd.DataFrame]:
+    return {horizon: build_features(daily, target, horizon, regions) for horizon in HORIZONS}
 
 
 def forecast(

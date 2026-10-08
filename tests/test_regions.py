@@ -34,3 +34,14 @@ def test_publication_delay_common_to_all_regions_excludes_none():
     status = region_status(daily)
     assert status["active"].all()
     assert (status["days_behind"] == 0).all()
+
+
+def test_models_cover_the_evaluation_regions_plus_any_region_that_returns():
+    from src.evaluation import TARGET_REGIONS
+    from src.predict import model_regions
+
+    gone = _daily(200, {"ARS Algarve": slice(150, None)})
+    assert model_regions(gone, "wait_minutes") == TARGET_REGIONS
+    back = _daily(200, {"ARS Algarve": slice(0, 120)})
+    assert "ARS Algarve" in model_regions(back, "wait_minutes")
+    assert model_regions(back, "wait_minutes") == list(REGIONS)

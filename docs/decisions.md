@@ -367,7 +367,7 @@ Its own 10–90 % interval, with no calibration, covers 76.5 % (waiting time, 17
 - Status on 2026-10-07: Norte, Centro, Lisboa e Vale do Tejo, Alentejo and mainland Portugal are active (100 % coverage). The Algarve is inactive (0 % coverage over the last 90 days).
 
 **Consequences.**
-- If the Algarve resumes publishing, it is forecast again after about 72 days of data (80 % of 90), with no code change. The global models already learnt its history from 2017–2025.
+- If the Algarve resumes publishing, it is forecast again after about 72 days of data (80 % of 90), with no code change. `src/predict.py` (`model_regions()`) trains the models on the five evaluation series plus every active region, and the models take the region list as a parameter. The Algarve's history from 2017–2025 (about 2,900 training days for LightGBM) is used as soon as it is included. *Clarified on 2026-10-08: the first version of this decision said "no code change" before the models accepted a region list; that is now true.*
 - An inactive region is shown as "no recent waiting-time data", never with an invented or borrowed value (compare snsmonitor.pt in [data-sources.md](data-sources.md)).
 
 **Validation results** (added 2026-10-08): on 2023–2024, Chronos-2 scores 7.52 minutes for the waiting time (LightGBM 7.48) and 248 for episodes (LightGBM 238). Its 10–90 % interval covers 77.0 % and 77.9 %. For the waiting time it ties with LightGBM in both periods. For episodes it is weaker on validation than on test.

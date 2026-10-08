@@ -1,0 +1,8 @@
+# Dependências da previsão diária (GitHub Actions). O PyTorch é instalado antes, na versão só para CPU.
+pandas==3.0.6
+pyarrow==25.0.1
+holidays==0.106
+statsmodels==0.15.0
+lightgbm==4.7.0
+torch==2.14.1
+chronos-forecasting==2.3.2

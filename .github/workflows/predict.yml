@@ -1,0 +1,54 @@
+name: Previsão diária
+
+on:
+  workflow_run:
+    workflows: ["Recolha diária de dados"]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  predict:
+    # Só corre se a recolha correu bem (ou se for lançada à mão).
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main   # inclui o commit de dados feito pela recolha
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: requirements-predict.txt
+
+      - name: Instalar dependências (PyTorch só para CPU)
+        run: |
+          pip install torch==2.14.1 --index-url https://download.pytorch.org/whl/cpu
+          pip install -r requirements-predict.txt
+
+      - name: Cache do modelo Chronos-2
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/huggingface
+          key: chronos-2
+
+      - name: Previsão
+        run: python -m src.predict
+
+      - name: Commit da previsão
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/predictions
+          if git diff --cached --quiet; then
+            echo "Sem alterações."
+          else
+            git commit -m "previsão: $(date -u +%Y-%m-%d)"
+            git pull --rebase
+            git push
+          fi

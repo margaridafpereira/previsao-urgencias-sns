@@ -41,12 +41,14 @@ def load_pipeline():
     return Chronos2Pipeline.from_pretrained(MODEL_ID, device_map="cpu")
 
 
-def build_inputs(daily: pd.DataFrame, target: str) -> tuple[pd.DataFrame, pd.DataFrame, list[str]]:
+def build_inputs(
+    daily: pd.DataFrame, target: str, regions: list[str] = TARGET_REGIONS
+) -> tuple[pd.DataFrame, pd.DataFrame, list[str]]:
     """Tabela diária por região (alvo + covariáveis passadas) e calendário futuro."""
     past = ["respiratory_pct", "admission_pct", "temperature_2m_mean", "precipitation_sum"]
     if target != "episodes":
         past.append("episodes")
-    columns = {"target": _wide(daily, target), **{name: _wide(daily, name) for name in past}}
+    columns = {"target": _wide(daily, target, regions), **{name: _wide(daily, name, regions) for name in past}}
     frame = pd.concat({name: wide.stack(future_stack=True) for name, wide in columns.items()}, axis=1)
     frame.index.names = ["timestamp", "ars"]
     frame = frame.reset_index()
@@ -58,14 +60,17 @@ def build_inputs(daily: pd.DataFrame, target: str) -> tuple[pd.DataFrame, pd.Dat
     return frame, cal, past
 
 
-def forecast(daily: pd.DataFrame, target: str, period, pipeline=None) -> pd.DataFrame:
+def forecast_origins(
+    daily: pd.DataFrame,
+    target: str,
+    origins: pd.DatetimeIndex,
+    pipeline=None,
+    regions: list[str] = TARGET_REGIONS,
+) -> pd.DataFrame:
+    """Previsões para as origens dadas, com o quantil 10 % e 90 % (y_low, y_high)."""
     pipeline = load_pipeline() if pipeline is None else pipeline
-    frame, cal, past = build_inputs(daily, target)
+    frame, cal, past = build_inputs(daily, target, regions)
     by_region = {region: group.set_index("timestamp").sort_index() for region, group in frame.groupby("ars")}
-    dates = by_region[TARGET_REGIONS[0]].index
-    start, end = period
-    end = dates[-1] if end is None else end
-    origins = dates[(dates >= start - pd.Timedelta(days=N_HORIZONS)) & (dates < end)]
     future_columns = FUTURE + ["is_covid"]
 
     results = []
@@ -76,7 +81,7 @@ def forecast(daily: pd.DataFrame, target: str, period, pipeline=None) -> pd.Data
         for origin in chunk:
             context_days = pd.date_range(origin - pd.Timedelta(days=CONTEXT_DAYS - 1), origin)
             future_days = pd.date_range(origin + pd.Timedelta(days=1), periods=N_HORIZONS)
-            for region in TARGET_REGIONS:
+            for region in regions:
                 item = f"{region}|{origin.date()}"
                 context = by_region[region].reindex(context_days)[["target", *past]].ffill().bfill()
                 context = context.join(cal[future_columns])
@@ -109,6 +114,14 @@ def forecast(daily: pd.DataFrame, target: str, period, pipeline=None) -> pd.Data
     truth.index.names = ["target_date", "ars"]
     forecasts = forecasts.join(truth, on=["target_date", "ars"])
     return forecasts[FORECAST_COLUMNS + ["y_low", "y_high"]]
+
+
+def forecast(daily: pd.DataFrame, target: str, period, pipeline=None) -> pd.DataFrame:
+    dates = _wide(daily, target).index
+    start, end = period
+    end = dates[-1] if end is None else end
+    origins = dates[(dates >= start - pd.Timedelta(days=N_HORIZONS)) & (dates < end)]
+    return forecast_origins(daily, target, origins, pipeline)
 
 
 def main() -> None:

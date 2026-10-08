@@ -24,13 +24,13 @@ N_LAGS = 14
 WEATHER = ["temperature_2m_mean", "temperature_2m_max", "temperature_2m_min", "precipitation_sum"]
 
 
-def _wide(daily: pd.DataFrame, column: str) -> pd.DataFrame:
+def _wide(daily: pd.DataFrame, column: str, regions: list[str] = TARGET_REGIONS) -> pd.DataFrame:
     """Uma coluna por região, um dia por linha, lacunas preenchidas com o último valor."""
     wide = daily.pivot(index="periodo", columns="ars", values=column).asfreq("D").ffill()
     if column in WEATHER:
         # Portugal Continental não tem estação própria (D5): usa a média das regiões.
         wide["Portugal Continental"] = wide.drop(columns="Portugal Continental", errors="ignore").mean(axis=1)
-    return wide[TARGET_REGIONS]
+    return wide.reindex(columns=regions)
 
 
 def _long(wide: pd.DataFrame, name: str) -> pd.Series:
@@ -55,14 +55,16 @@ def calendar(dates: pd.DatetimeIndex) -> pd.DataFrame:
     )
 
 
-def build_features(daily: pd.DataFrame, target: str, horizon: int) -> pd.DataFrame:
+def build_features(
+    daily: pd.DataFrame, target: str, horizon: int, regions: list[str] = TARGET_REGIONS
+) -> pd.DataFrame:
     """Tabela de treino/previsão para um horizonte.
 
     Colunas fixas: origin, target_date, ars, base, y_true, y_rel (= y_true - base).
     As restantes são features.
     """
-    y = _wide(daily, target)
-    observed = daily.pivot(index="periodo", columns="ars", values=target).asfreq("D")[TARGET_REGIONS]
+    y = _wide(daily, target, regions)
+    observed = daily.pivot(index="periodo", columns="ars", values=target).asfreq("D").reindex(columns=regions)
     base = y.rolling(BASE_WINDOW, min_periods=7).mean()
 
     columns: dict[str, pd.Series] = {"base": _long(base, "base")}
@@ -77,14 +79,14 @@ def build_features(daily: pd.DataFrame, target: str, horizon: int) -> pd.DataFra
     columns["std_28"] = _long(y.rolling(BASE_WINDOW).std(), "std_28")
 
     if target != "episodes":
-        episodes = _wide(daily, "episodes")
+        episodes = _wide(daily, "episodes", regions)
         columns["episodes_ratio"] = _long(episodes / episodes.rolling(BASE_WINDOW).mean(), "episodes_ratio")
-    respiratory = _wide(daily, "respiratory_pct")
+    respiratory = _wide(daily, "respiratory_pct", regions)
     columns["respiratory_pct"] = _long(respiratory, "respiratory_pct")
     columns["respiratory_change_7"] = _long(respiratory - respiratory.shift(7), "respiratory_change_7")
-    columns["admission_pct"] = _long(_wide(daily, "admission_pct"), "admission_pct")
+    columns["admission_pct"] = _long(_wide(daily, "admission_pct", regions), "admission_pct")
     for variable in WEATHER:
-        columns[variable] = _long(_wide(daily, variable).rolling(3).mean(), variable)
+        columns[variable] = _long(_wide(daily, variable, regions).rolling(3).mean(), variable)
 
     table = pd.concat(columns.values(), axis=1)
     table.index.names = ["origin", "ars"]
@@ -99,7 +101,7 @@ def build_features(daily: pd.DataFrame, target: str, horizon: int) -> pd.DataFra
     truth.index.names = ["target_date", "ars"]
     table = table.join(truth, on=["target_date", "ars"])
     table["y_rel"] = table["y_true"] - table["base"]
-    table["ars"] = pd.Categorical(table["ars"], categories=TARGET_REGIONS)
+    table["ars"] = pd.Categorical(table["ars"], categories=regions)
     return table.dropna(subset=["base"]).reset_index(drop=True)
 
 

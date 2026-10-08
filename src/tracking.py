@@ -11,9 +11,6 @@ from __future__ import annotations
 
 import os
 
-os.environ.setdefault("MLFLOW_DISABLE_AGENT_HINT", "1")
-
-import mlflow
 import pandas as pd
 
 from src.evaluation import FORECASTS_DIR, TARGETS, TEST, VALIDATION, save_forecasts, score
@@ -23,6 +20,10 @@ EXPERIMENT = "model-comparison"
 
 
 def log_evaluation(forecasts: pd.DataFrame, model: str, target: str, test: bool, params: dict | None = None) -> None:
+    # Importado só aqui: a previsão diária (src/predict.py) não precisa do MLflow instalado.
+    os.environ.setdefault("MLFLOW_DISABLE_AGENT_HINT", "1")
+    import mlflow
+
     period = TEST if test else VALIDATION
     period_name = "test" if test else "validation"
     table = score(forecasts, period)
