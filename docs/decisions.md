@@ -417,3 +417,18 @@ The delay decides which horizons the published forecast really needs. If the lat
 
 **Consequences.**
 - How the forecast handles the delay is decided once the log has a few weeks of data, or earlier if the forecast horizon is extended (see the roadmap).
+
+---
+
+## D21: Keep the 7-day horizon, state the SNS delay openly, and keep 14 days as an option
+
+**Context.** With a publication delay of about 5 days (D20), the models forecast 7 days from the latest published day. On 2026-10-08, with data up to 2026-10-03, they cover 4 to 10 October, so only today and the next 2 days are still in the future. Extending the models to 14 days would cover a full week ahead, but every model would have to be adapted and evaluated again.
+
+**Decision.**
+- **Keep the 7-day horizon for now.** The published forecast shows the days from the latest published day up to `t + 7`, each with its date. Days already past are shown as "estimates of days the SNS has not published yet", not as forecasts.
+- **State the delay clearly** next to the forecast: "Latest official SNS data: 3 October 2026 (published with a delay of about 5 days)". The date comes from the data, not from a fixed number.
+- **Option to extend to 14 days later:** the models are written for a configurable horizon (`evaluation.HORIZONS`). Extending means re-running the evaluation of the four models in D18, which takes about 3–4 hours of CPU. This is done when the publication log (D20) confirms the delay is structural, or if users need more days ahead.
+
+**Consequences.**
+- On a typical day the forecast covers today plus about 2 days. Its usefulness depends on how often and how late the SNS publishes, which the log will show.
+- The published accuracy stays the one measured for horizons 1–7 (D18). It is not reduced to the subset of horizons that are still in the future.

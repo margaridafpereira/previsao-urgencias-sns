@@ -98,7 +98,9 @@ The four-model equal-weight average was chosen on the validation period and conf
 | 8d | Classical models ETS and SARIMAX (D16); literature review (docs/literature.md) | done |
 | 8e | Zero-shot foundation model Chronos-2: ties with LightGBM (D17) | done |
 | 8f | Final ensemble chosen on validation: four-model average (D18) | done |
-| 9 | School holidays; publication delay; daily forecast in GitHub Actions; demo on Hugging Face Spaces | next |
+| 9 | Publication delay: measured daily (D20); 7-day horizon kept, delay shown openly, 14 days as an option (D21) | done |
+| 10 | Daily forecast in GitHub Actions; demo on Hugging Face Spaces | next |
+| — | Later: school holidays, weather forecasts, 14-day horizon, hierarchical reconciliation | optional |
 
 ## Stack (all free)
 
