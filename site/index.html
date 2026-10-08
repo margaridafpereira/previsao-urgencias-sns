@@ -10,6 +10,7 @@
     color-scheme: light;
     --page: #f9f9f7;
     --surface: #fcfcfb;
+    --surface-2: #f3f2ee;
     --ink: #0b0b0b;
     --ink-2: #52514e;
     --muted: #6f6e69;
@@ -18,74 +19,99 @@
     --border: rgba(11, 11, 11, 0.10);
     --series: #2a78d6;
     --series-wash: rgba(42, 120, 214, 0.12);
+    --series-soft: #cde2fb;
     --observed: #52514e;
     --normal: #898781;
     --pending: rgba(137, 135, 129, 0.10);
-    --up: #b4361f;
-    --down: #006300;
+    --good: #0ca30c;
+    --warning: #fab219;
+    --serious: #ec835a;
+    --neutral: #898781;
+    --critical: #d03b3b;
+    --shadow: 0 1px 2px rgba(11, 11, 11, 0.04), 0 4px 16px rgba(11, 11, 11, 0.04);
   }
   @media (prefers-color-scheme: dark) {
     :root:where(:not([data-theme="light"])) {
       color-scheme: dark;
-      --page: #0d0d0d;
-      --surface: #1a1a19;
-      --ink: #ffffff;
-      --ink-2: #c3c2b7;
-      --muted: #a3a29b;
-      --grid: #2c2c2a;
-      --axis: #383835;
-      --border: rgba(255, 255, 255, 0.10);
-      --series: #3987e5;
-      --series-wash: rgba(57, 135, 229, 0.18);
-      --observed: #c3c2b7;
-      --normal: #898781;
-      --pending: rgba(195, 194, 183, 0.08);
-      --up: #ec835a;
-      --down: #0ca30c;
+      --page: #0d0d0d; --surface: #1a1a19; --surface-2: #232321; --ink: #ffffff; --ink-2: #c3c2b7; --muted: #a3a29b;
+      --grid: #2c2c2a; --axis: #383835; --border: rgba(255, 255, 255, 0.10);
+      --series: #3987e5; --series-wash: rgba(57, 135, 229, 0.18); --series-soft: #184f95;
+      --observed: #c3c2b7; --normal: #898781; --pending: rgba(195, 194, 183, 0.08); --shadow: none;
     }
   }
   :root[data-theme="dark"] {
     color-scheme: dark;
-    --page: #0d0d0d; --surface: #1a1a19; --ink: #ffffff; --ink-2: #c3c2b7; --muted: #a3a29b;
+    --page: #0d0d0d; --surface: #1a1a19; --surface-2: #232321; --ink: #ffffff; --ink-2: #c3c2b7; --muted: #a3a29b;
     --grid: #2c2c2a; --axis: #383835; --border: rgba(255, 255, 255, 0.10);
-    --series: #3987e5; --series-wash: rgba(57, 135, 229, 0.18); --observed: #c3c2b7;
-    --normal: #898781; --pending: rgba(195, 194, 183, 0.08); --up: #ec835a; --down: #0ca30c;
+    --series: #3987e5; --series-wash: rgba(57, 135, 229, 0.18); --series-soft: #184f95;
+    --observed: #c3c2b7; --normal: #898781; --pending: rgba(195, 194, 183, 0.08); --shadow: none;
   }
   * { box-sizing: border-box; }
-  body {
-    margin: 0; background: var(--page); color: var(--ink);
-    font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
-  }
-  main { max-width: 960px; margin: 0 auto; padding: 24px 16px 48px; }
-  h1 { font-size: 1.6rem; line-height: 1.25; margin: 0 0 4px; font-weight: 650; }
-  .lede { color: var(--ink-2); margin: 0 0 16px; }
-  .status {
-    display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 0.9rem; color: var(--ink-2);
-    padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); margin-bottom: 16px;
-  }
+  body { margin: 0; background: var(--page); color: var(--ink); font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  main { max-width: 1040px; margin: 0 auto; padding: 20px 16px 48px; }
+  button, select { font: inherit; color: inherit; }
+
+  .top { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+  h1 { font-size: 1.7rem; line-height: 1.2; margin: 0; font-weight: 700; letter-spacing: -0.01em; }
+  .lede { color: var(--ink-2); margin: 6px 0 16px; max-width: 720px; }
+  .lang { display: inline-flex; border: 1px solid var(--border); border-radius: 999px; overflow: hidden; flex-shrink: 0; background: var(--surface); }
+  .lang button { border: 0; background: transparent; padding: 4px 12px; cursor: pointer; font-size: 0.85rem; font-weight: 600; color: var(--ink-2); min-height: 32px; }
+  .lang button[aria-pressed="true"] { background: var(--ink); color: var(--surface); }
+
+  .status { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 18px; font-size: 0.88rem; color: var(--ink-2); margin-bottom: 16px; }
+  .status .pill { display: inline-flex; align-items: center; gap: 6px; }
+  .status .pill::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--series); flex-shrink: 0; }
+  .status .pill.official::before { background: var(--observed); }
   .status strong { color: var(--ink); font-weight: 600; }
-  .stale { color: var(--up); font-weight: 600; }
-  .filters { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: end; margin-bottom: 16px; }
-  .filters label { display: block; font-size: 0.8rem; color: var(--muted); margin-bottom: 4px; }
-  select, .seg button {
-    font: inherit; font-size: 0.95rem; color: var(--ink); background: var(--surface);
-    border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; min-height: 36px;
-  }
-  .seg { display: inline-flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
-  .seg button { border: 0; border-radius: 0; cursor: pointer; }
-  .seg button + button { border-left: 1px solid var(--border); }
-  .seg button[aria-pressed="true"] { background: var(--ink); color: var(--surface); }
-  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 16px; }
-  .hero { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; }
-  .tile .label { font-size: 0.85rem; color: var(--ink-2); }
-  .tile .value { font-size: 2.6rem; font-weight: 600; line-height: 1.1; margin: 4px 0; }
-  .tile .value small { font-size: 1rem; font-weight: 500; color: var(--ink-2); margin-left: 4px; }
-  .tile .sub { font-size: 0.9rem; color: var(--ink-2); }
-  .delta-up { color: var(--up); font-weight: 600; }
-  .delta-down { color: var(--down); font-weight: 600; }
+  .stale { color: var(--critical); font-weight: 600; }
+
+  .filters { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; margin-bottom: 16px; }
+  .seg { display: inline-flex; background: var(--surface-2); border-radius: 10px; padding: 3px; gap: 2px; }
+  .seg button { border: 0; background: transparent; border-radius: 8px; padding: 6px 12px; cursor: pointer; min-height: 34px; color: var(--ink-2); font-size: 0.92rem; }
+  .seg button[aria-pressed="true"] { background: var(--surface); color: var(--ink); font-weight: 600; box-shadow: 0 1px 2px rgba(0,0,0,0.12); }
+  select { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 6px 10px; min-height: 40px; font-size: 0.95rem; }
+
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 18px; margin-bottom: 16px; box-shadow: var(--shadow); }
+  .card h2 { font-size: 1.05rem; margin: 0 0 4px; font-weight: 650; }
+  .card .hint { font-size: 0.85rem; color: var(--muted); margin: 0 0 12px; }
+
+  .hero { display: grid; grid-template-columns: 1.4fr 1fr; gap: 20px; }
+  .hero-main { display: flex; flex-direction: column; gap: 8px; }
+  .eyebrow { font-size: 0.9rem; color: var(--ink-2); font-weight: 500; }
+  .big { font-size: 4.2rem; line-height: 1; font-weight: 700; letter-spacing: -0.02em; }
+  .big small { font-size: 1.2rem; font-weight: 500; color: var(--ink-2); margin-left: 6px; letter-spacing: 0; }
+  .range { font-size: 1rem; color: var(--ink-2); }
+  .range strong { color: var(--ink); font-weight: 600; }
+  .explain { font-size: 0.82rem; color: var(--muted); }
+  .range-bar { position: relative; height: 10px; border-radius: 5px; background: var(--surface-2); margin: 8px 0 2px; max-width: 380px; }
+  .range-bar .band { position: absolute; top: 0; bottom: 0; border-radius: 5px; background: var(--series-soft); }
+  .range-bar .pt { position: absolute; top: -3px; width: 16px; height: 16px; margin-left: -8px; border-radius: 50%; background: var(--series); border: 2px solid var(--surface); }
+  .range-bar .nm { position: absolute; top: -5px; bottom: -5px; width: 2px; margin-left: -1px; background: var(--ink-2); border-radius: 1px; }
+  .range-legend { font-size: 0.78rem; color: var(--muted); display: flex; gap: 14px; flex-wrap: wrap; }
+  .range-legend span { display: inline-flex; align-items: center; gap: 5px; }
+  .badge { display: inline-flex; align-items: center; gap: 8px; padding: 5px 12px 5px 6px; border-radius: 999px; background: var(--surface-2); font-weight: 600; font-size: 0.92rem; width: fit-content; }
+  .badge .ic { width: 22px; height: 22px; border-radius: 50%; display: inline-grid; place-items: center; color: #fff; font-size: 0.7rem; line-height: 1; }
+  .hero-side { display: grid; gap: 10px; align-content: start; }
+  .mini { background: var(--surface-2); border-radius: 10px; padding: 10px 12px; }
+  .mini .k { font-size: 0.8rem; color: var(--ink-2); }
+  .mini .v { font-size: 1.35rem; font-weight: 650; }
+  .mini .v small { font-size: 0.85rem; font-weight: 500; color: var(--ink-2); margin-left: 3px; }
+  .mini .s { font-size: 0.8rem; color: var(--muted); }
+
+  .days { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(92px, 1fr); gap: 8px; overflow-x: auto; padding-bottom: 6px; scroll-snap-type: x proximity; }
+  .day { border: 1px solid var(--border); border-radius: 12px; padding: 10px 8px; text-align: center; background: var(--surface); scroll-snap-align: start; }
+  .day.today { border-color: var(--series); box-shadow: inset 0 0 0 1px var(--series); }
+  .day.pending { background: var(--surface-2); }
+  .day .dn { font-size: 0.82rem; font-weight: 650; color: var(--ink); text-transform: capitalize; }
+  .day .dd { font-size: 0.75rem; color: var(--muted); }
+  .day .dv { font-size: 1.5rem; font-weight: 700; margin: 6px 0 0; line-height: 1.1; }
+  .day .dr { font-size: 0.72rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .day .lvl { display: inline-flex; align-items: center; gap: 4px; font-size: 0.72rem; color: var(--ink-2); margin-top: 6px; line-height: 1.2; }
+  .day .lvl i { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+  .day .tag { font-size: 0.68rem; color: var(--muted); margin-top: 4px; font-style: italic; }
+
   .chart-head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
-  .chart-head h2 { font-size: 1.05rem; margin: 0; font-weight: 600; }
-  .legend { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 0.85rem; color: var(--ink-2); }
+  .legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 0.82rem; color: var(--ink-2); }
   .legend span { display: inline-flex; align-items: center; gap: 6px; }
   .key-line { width: 18px; height: 2px; border-radius: 1px; display: inline-block; }
   .key-box { width: 14px; height: 10px; border-radius: 2px; display: inline-block; }
@@ -93,94 +119,117 @@
   svg { display: block; width: 100%; height: auto; overflow: visible; }
   .tick { font-size: 11px; fill: var(--muted); font-variant-numeric: tabular-nums; }
   .note-text { font-size: 11px; fill: var(--muted); }
-  .tooltip {
-    position: absolute; pointer-events: none; background: var(--surface); color: var(--ink);
-    border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; font-size: 0.85rem;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12); min-width: 170px; display: none; z-index: 2;
-  }
+  .tooltip { position: absolute; pointer-events: none; background: var(--surface); color: var(--ink); border: 1px solid var(--border); border-radius: 10px; padding: 8px 10px; font-size: 0.85rem; box-shadow: 0 6px 20px rgba(0,0,0,0.14); min-width: 180px; display: none; z-index: 2; }
   .tooltip .t-date { color: var(--ink-2); margin-bottom: 4px; }
-  .tooltip .t-row { display: flex; align-items: center; gap: 6px; justify-content: space-between; }
+  .tooltip .t-row { display: flex; align-items: center; gap: 8px; justify-content: space-between; }
   .tooltip .t-row b { font-variant-numeric: tabular-nums; }
   .tooltip .t-name { display: inline-flex; align-items: center; gap: 6px; color: var(--ink-2); }
-  .tooltip .t-models { margin-top: 4px; padding-top: 4px; border-top: 1px solid var(--border); color: var(--ink-2); font-size: 0.8rem; }
-  .accuracy { font-size: 0.9rem; color: var(--ink-2); margin-top: 8px; }
-  details summary { cursor: pointer; color: var(--ink-2); font-size: 0.9rem; }
-  table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 0.9rem; }
-  th, td { text-align: right; padding: 6px 8px; border-bottom: 1px solid var(--grid); font-variant-numeric: tabular-nums; }
+  .tooltip .t-models { margin-top: 4px; padding-top: 4px; border-top: 1px solid var(--border); color: var(--ink-2); font-size: 0.78rem; }
+
+  .regions { display: grid; gap: 4px; }
+  .reg { display: grid; grid-template-columns: minmax(110px, 200px) 1fr 80px; align-items: center; gap: 12px; padding: 7px 8px; border-radius: 10px; border: 0; background: transparent; cursor: pointer; text-align: left; }
+  .reg:hover:not(:disabled) { background: var(--surface-2); }
+  .reg[aria-pressed="true"] { background: var(--surface-2); }
+  .reg .rn { font-size: 0.92rem; }
+  .reg[aria-pressed="true"] .rn { font-weight: 650; }
+  .reg .track { position: relative; height: 18px; }
+  .reg .bar { position: absolute; left: 0; top: 0; height: 18px; border-radius: 0 4px 4px 0; background: var(--series); }
+  .reg .nmk { position: absolute; top: -3px; height: 24px; width: 2px; margin-left: -1px; background: var(--ink); border-radius: 1px; opacity: 0.7; }
+  .reg .rv { font-weight: 650; font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+  .reg:disabled { cursor: default; }
+  .reg:disabled .rn, .reg:disabled .rv { color: var(--muted); font-weight: 400; }
+  .reg.sep { margin-top: 6px; }
+  .reg-sep { height: 1px; background: var(--grid); margin: 4px 8px; }
+
+  details summary { cursor: pointer; color: var(--ink-2); font-size: 0.9rem; margin-top: 8px; }
+  .table-scroll { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 0.88rem; }
+  th, td { text-align: right; padding: 6px 8px; border-bottom: 1px solid var(--grid); font-variant-numeric: tabular-nums; white-space: nowrap; }
   th:first-child, td:first-child, th:nth-child(2), td:nth-child(2) { text-align: left; }
   th { color: var(--muted); font-weight: 500; }
-  .notice { font-size: 0.9rem; color: var(--ink-2); }
-  .notice p { margin: 0; }
+  .notice p { margin: 0; color: var(--ink-2); font-size: 0.92rem; }
   .notice p + p { margin-top: 8px; }
-  .about h2 { font-size: 1.05rem; margin: 0 0 8px; }
-  .about p, .about li { color: var(--ink-2); font-size: 0.92rem; }
+  .about ul { padding-left: 20px; margin: 8px 0; }
+  .about li, .about p { color: var(--ink-2); font-size: 0.92rem; }
   .about a { color: var(--series); }
-  .emergency { font-weight: 600; color: var(--ink); }
-  @media (max-width: 520px) { .tile .value { font-size: 2.1rem; } h1 { font-size: 1.35rem; } }
+  .emergency { display: flex; gap: 10px; align-items: flex-start; background: var(--surface-2); border-radius: 10px; padding: 10px 12px; color: var(--ink); font-weight: 600; font-size: 0.92rem; margin-top: 12px; }
+  @media (max-width: 760px) {
+    .hero { grid-template-columns: 1fr; }
+    .big { font-size: 3.3rem; }
+    h1 { font-size: 1.4rem; }
+    .reg { grid-template-columns: 112px 1fr 64px; gap: 8px; }
+  }
 </style>
 </head>
 <body>
 <main>
-  <h1>Urgências do SNS: previsão a 14 dias</h1>
-  <p class="lede">Tempo médio de espera entre a triagem e a primeira observação médica, e número de episódios, por região de Portugal Continental. Calculado todos os dias a partir de dados públicos.</p>
-
-  <div class="status" id="status" aria-live="polite">A carregar…</div>
-
-  <div class="filters" role="group" aria-label="Filtros">
+  <div class="top">
     <div>
-      <label for="target">Indicador</label>
-      <select id="target"></select>
+      <h1 data-i18n="title"></h1>
+      <p class="lede" data-i18n="lede"></p>
     </div>
-    <div>
-      <label for="region">Região</label>
-      <select id="region"></select>
+    <div class="lang" role="group" aria-label="Idioma / Language">
+      <button type="button" data-lang="pt" aria-pressed="true">PT</button>
+      <button type="button" data-lang="en" aria-pressed="false">EN</button>
     </div>
-    <div>
-      <label id="range-label">Período</label>
-      <div class="seg" role="group" aria-labelledby="range-label">
-        <button type="button" data-range="7" aria-pressed="true">Próximos 7 dias</button>
-        <button type="button" data-range="14" aria-pressed="false">Até 14 dias</button>
-      </div>
+  </div>
+
+  <div class="status" id="status" aria-live="polite"></div>
+
+  <div class="filters">
+    <div class="seg" role="group" id="target-seg"></div>
+    <select id="region"></select>
+    <div class="seg" role="group" id="range-seg">
+      <button type="button" data-range="7" aria-pressed="true" data-i18n="next7"></button>
+      <button type="button" data-range="14" aria-pressed="false" data-i18n="upto14"></button>
     </div>
   </div>
 
   <section class="card hero" id="hero" aria-live="polite"></section>
 
   <section class="card">
+    <h2 data-i18n="daysTitle"></h2>
+    <p class="hint" data-i18n="daysHint"></p>
+    <div class="days" id="days"></div>
+  </section>
+
+  <section class="card">
     <div class="chart-head">
-      <h2 id="chart-title"></h2>
-      <div class="legend" id="legend">
-        <span><i class="key-line" style="background:var(--observed)"></i>Dados oficiais do SNS</span>
-        <span><i class="key-line" style="background:var(--series)"></i>Previsão</span>
-        <span><i class="key-box" style="background:var(--series-wash)"></i>Intervalo de 80 %</span>
-        <span><i class="key-line" style="background:var(--normal);height:1.5px"></i>Normal para a época</span>
-        <span><i class="key-box" style="background:var(--pending);outline:1px solid var(--border)"></i>Dias ainda não publicados pelo SNS</span>
+      <div>
+        <h2 id="chart-title"></h2>
+        <p class="hint" data-i18n="chartHint"></p>
+      </div>
+      <div class="legend">
+        <span><i class="key-line" style="background:var(--observed)"></i><span data-i18n="lgOfficial"></span></span>
+        <span><i class="key-line" style="background:var(--series)"></i><span data-i18n="lgForecast"></span></span>
+        <span><i class="key-box" style="background:var(--series-wash)"></i><span data-i18n="lgRange"></span></span>
+        <span><i class="key-line" style="background:var(--normal);height:1.5px"></i><span data-i18n="lgNormal"></span></span>
+        <span><i class="key-box" style="background:var(--pending);outline:1px solid var(--border)"></i><span data-i18n="lgPending"></span></span>
       </div>
     </div>
     <div class="chart-wrap" id="chart-wrap">
       <svg id="chart" role="img" aria-labelledby="chart-title"></svg>
       <div class="tooltip" id="tooltip" role="status"></div>
     </div>
-    <p class="accuracy" id="accuracy"></p>
     <details>
-      <summary>Ver os valores em tabela</summary>
-      <table id="table"><thead></thead><tbody></tbody></table>
+      <summary data-i18n="showTable"></summary>
+      <div class="table-scroll"><table id="table"><thead></thead><tbody></tbody></table></div>
     </details>
+  </section>
+
+  <section class="card">
+    <h2 id="regions-title"></h2>
+    <p class="hint" data-i18n="regionsHint"></p>
+    <div class="regions" id="regions"></div>
   </section>
 
   <section class="card notice" id="inactive" hidden></section>
 
   <section class="card about">
-    <h2>Como funciona</h2>
-    <ul>
-      <li><strong>Dados:</strong> Portal da Transparência do SNS (médias diárias por região) e meteorologia do Open-Meteo. O SNS publica com alguns dias de atraso; os dias já passados que ainda não foram publicados aparecem como estimativas.</li>
-      <li><strong>Modelo:</strong> média de quatro modelos (LightGBM, uma rede LSTM, SARIMAX e o modelo fundacional Chronos-2), escolhida por comparação com 2023–2024 e confirmada em 2025–2026.</li>
-      <li><strong>Intervalo de 80 %:</strong> em cerca de 8 em cada 10 dias, o valor real fica dentro da faixa sombreada.</li>
-      <li><strong>Normal para a época:</strong> média dos mesmos dias do ano (± 7 dias) em 2023, 2024 e 2025.</li>
-      <li>Os valores são médias regionais: não dizem quanto se espera num hospital concreto, nem numa urgência pediátrica, obstétrica ou psiquiátrica.</li>
-    </ul>
-    <p>Código, decisões e avaliação completa: <a href="https://github.com/margaridafpereira/previsao-urgencias-sns">github.com/margaridafpereira/previsao-urgencias-sns</a>.</p>
-    <p class="emergency">Esta página não substitui aconselhamento médico. Em caso de emergência ligue 112. Em caso de dúvida ligue SNS 24: 808 24 24 24.</p>
+    <h2 data-i18n="aboutTitle"></h2>
+    <ul id="about-list"></ul>
+    <p><span data-i18n="code"></span> <a href="https://github.com/margaridafpereira/previsao-urgencias-sns">github.com/margaridafpereira/previsao-urgencias-sns</a></p>
+    <div class="emergency"><span aria-hidden="true">✚</span><span data-i18n="emergency"></span></div>
   </section>
 </main>
 
@@ -188,225 +237,326 @@
 "use strict";
 const SVG_NS = "http://www.w3.org/2000/svg";
 const MODEL_NAMES = { lightgbm: "LightGBM", lstm: "LSTM", sarimax: "SARIMAX", chronos2: "Chronos-2" };
-const REGION_NAMES = {
-  "ARS Norte": "Norte", "ARS Centro": "Centro", "ARS Lisboa e Vale do Tejo": "Lisboa e Vale do Tejo",
-  "ARS Alentejo": "Alentejo", "ARS Algarve": "Algarve", "Portugal Continental": "Portugal Continental"
-};
-const MONTHS = ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"];
-const fmtDay = { format: (d) => `${d.getDate()} ${MONTHS[d.getMonth()]}` };
-const fmtDayLong = new Intl.DateTimeFormat("pt-PT", { weekday: "long", day: "numeric", month: "long" });
-const fmtNum = new Intl.NumberFormat("pt-PT", { maximumFractionDigits: 0 });
-const state = { target: "wait_minutes", region: "Portugal Continental", range: 7 };
-let DATA = null, ACC = null;
 
+const I18N = {
+  pt: {
+    locale: "pt-PT",
+    title: "Urgências do SNS: como vão estar os próximos dias",
+    lede: "Previsão do tempo médio de espera (da triagem até ao médico) e do número de episódios nas urgências, por região de Portugal Continental, até 14 dias. Calculada todos os dias a partir de dados públicos.",
+    official: "Últimos dados oficiais do SNS", delay: (n) => `publicados com ${n} dias de atraso`,
+    computed: "Previsão calculada", stale: "Atenção: a previsão não é atualizada há mais de 2 dias.",
+    loading: "A carregar…", loadError: "Não foi possível carregar a previsão.",
+    targets: { wait_minutes: "Tempo de espera", episodes: "Episódios" },
+    targetLong: { wait_minutes: "Tempo médio de espera", episodes: "Episódios de urgência por dia" },
+    targetLower: { wait_minutes: "tempos de espera", episodes: "números de episódios" },
+    units: { wait_minutes: "min", episodes: "episódios" },
+    next7: "Próximos 7 dias", upto14: "Até 14 dias",
+    today: "Hoje", forecastFor: (when, region) => `${when} · ${region}`,
+    likely: "Faixa provável",
+    likelyExplain: "Em 8 de cada 10 dias, o valor real fica dentro da faixa provável (verificado em 2025–2026).",
+    legendPoint: "previsão", legendRange: "faixa provável", legendNormal: "normal para a época",
+    normalFor: (v, u) => `normal para a época: ${v} ${u}`,
+    levels: { low: "Abaixo do normal", normal: "Normal para a época", high: "Acima do normal", veryhigh: "Muito acima do normal" },
+    lastOfficial: "Último valor oficial",
+    typicalError: "Erro habitual desta previsão", typicalErrorSub: (n) => `a ${n} dias do último dado oficial, medido em 2025–2026`,
+    noError: "sem medição: região fora da avaliação dos modelos",
+    modelsAgree: "Acordo entre os 4 modelos", agree: { high: "Alto", mid: "Médio", low: "Baixo" },
+    agreeSub: (v, u) => `maior diferença entre modelos: ${v} ${u}`,
+    daysTitle: "Dia a dia",
+    daysHint: "Valor previsto, faixa provável e nível em relação ao normal para a época. Os dias a cinzento já passaram, mas o SNS ainda não os publicou.",
+    pendingTag: "ainda não publicado",
+    chartHint: "Últimas 4 semanas de dados oficiais e a previsão. Passe o rato (ou use as setas) para ver cada dia.",
+    lgOfficial: "Dados oficiais do SNS", lgForecast: "Previsão", lgRange: "Faixa provável (80 %)", lgNormal: "Normal para a época", lgPending: "Ainda não publicado pelo SNS",
+    pendingBand: "ainda não publicados", todayMark: "hoje",
+    tOfficial: "Dado oficial", tForecast: "Previsão", tRange: "Faixa provável", tNormal: "Normal",
+    tKindPending: "ainda não publicado", tKindForecast: "previsão", tKindOfficial: "dado oficial",
+    showTable: "Ver os valores em tabela",
+    th: ["Dia", "Tipo", "Previsão", "Faixa provável", "Normal"], kindPending: "Ainda não publicado", kindForecast: "Previsão",
+    regionsTitle: (when) => `${when} em todas as regiões`,
+    regionsHint: "A barra é a previsão; o traço vertical é o normal para a época. Toque numa região para a ver em detalhe.",
+    noForecast: "sem dados",
+    inactive: (region, what, last) => `${region}: o SNS não está a publicar ${what} para esta região, por isso não há previsão.${last ? ` O último valor publicado é de ${last}.` : ""} A região volta a ser prevista automaticamente quando a publicação for retomada.`,
+    aboutTitle: "Como funciona",
+    about: [
+      ["Dados: ", "Portal da Transparência do SNS (médias diárias por região) e meteorologia do Open-Meteo. O SNS publica com alguns dias de atraso, por isso os dias já passados que ainda não foram publicados também são estimados."],
+      ["Previsão: ", "média de quatro modelos (LightGBM, uma rede neuronal LSTM, SARIMAX e o modelo fundacional Chronos-2), escolhida por comparação em 2023–2024 e confirmada em 2025–2026, onde errou cerca de 6 minutos em média."],
+      ["Faixa provável: ", "não é uma garantia: em 8 de cada 10 dias o valor real fica dentro dela, e nos outros 2 fica acima ou abaixo."],
+      ["Normal para a época: ", "média dos mesmos dias do ano (± 7 dias) em 2023, 2024 e 2025. \"Acima do normal\" quer dizer mais de 10 % acima; \"muito acima\", mais de 25 %."],
+      ["Atenção: ", "são médias regionais. Não dizem quanto se espera num hospital concreto, nem nas urgências pediátricas, obstétricas ou psiquiátricas."],
+    ],
+    code: "Código, decisões e avaliação completa:",
+    emergency: "Esta página não substitui aconselhamento médico. Numa emergência ligue 112. Em caso de dúvida ligue SNS 24: 808 24 24 24.",
+    regionNames: { "ARS Norte": "Norte", "ARS Centro": "Centro", "ARS Lisboa e Vale do Tejo": "Lisboa e Vale do Tejo", "ARS Alentejo": "Alentejo", "ARS Algarve": "Algarve", "Portugal Continental": "Portugal Continental" },
+    months: ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"],
+    regionLabel: "Região",
+  },
+  en: {
+    locale: "en-GB",
+    title: "Portuguese NHS emergency departments: the days ahead",
+    lede: "Forecast of the average waiting time (from triage to the first doctor) and the number of emergency visits, per region of mainland Portugal, up to 14 days ahead. Updated daily from public data.",
+    official: "Latest official SNS data", delay: (n) => `published ${n} days late`,
+    computed: "Forecast computed", stale: "Warning: the forecast has not been updated for more than 2 days.",
+    loading: "Loading…", loadError: "The forecast could not be loaded.",
+    targets: { wait_minutes: "Waiting time", episodes: "Visits" },
+    targetLong: { wait_minutes: "Average waiting time", episodes: "Emergency visits per day" },
+    targetLower: { wait_minutes: "waiting times", episodes: "visit numbers" },
+    units: { wait_minutes: "min", episodes: "visits" },
+    next7: "Next 7 days", upto14: "Up to 14 days",
+    today: "Today", forecastFor: (when, region) => `${when} · ${region}`,
+    likely: "Likely range",
+    likelyExplain: "On 8 days out of 10, the actual value falls inside the likely range (checked on 2025–2026).",
+    legendPoint: "forecast", legendRange: "likely range", legendNormal: "seasonal normal",
+    normalFor: (v, u) => `seasonal normal: ${v} ${u}`,
+    levels: { low: "Below normal", normal: "Normal for the season", high: "Above normal", veryhigh: "Well above normal" },
+    lastOfficial: "Latest official value",
+    typicalError: "Typical error of this forecast", typicalErrorSub: (n) => `${n} days after the latest official data, measured on 2025–2026`,
+    noError: "not measured: region outside the model evaluation",
+    modelsAgree: "Agreement between the 4 models", agree: { high: "High", mid: "Medium", low: "Low" },
+    agreeSub: (v, u) => `largest gap between models: ${v} ${u}`,
+    daysTitle: "Day by day",
+    daysHint: "Forecast value, likely range and level compared with the seasonal normal. Grey days are in the past but not yet published by the SNS.",
+    pendingTag: "not yet published",
+    chartHint: "Last 4 weeks of official data and the forecast. Hover (or use the arrow keys) to see each day.",
+    lgOfficial: "Official SNS data", lgForecast: "Forecast", lgRange: "Likely range (80 %)", lgNormal: "Seasonal normal", lgPending: "Not yet published by the SNS",
+    pendingBand: "not yet published", todayMark: "today",
+    tOfficial: "Official value", tForecast: "Forecast", tRange: "Likely range", tNormal: "Normal",
+    tKindPending: "not yet published", tKindForecast: "forecast", tKindOfficial: "official value",
+    showTable: "Show the values as a table",
+    th: ["Day", "Type", "Forecast", "Likely range", "Normal"], kindPending: "Not yet published", kindForecast: "Forecast",
+    regionsTitle: (when) => `${when} in every region`,
+    regionsHint: "The bar is the forecast; the vertical mark is the seasonal normal. Tap a region to see it in detail.",
+    noForecast: "no data",
+    inactive: (region, what, last) => `${region}: the SNS is not publishing ${what} for this region, so there is no forecast.${last ? ` The latest published value is from ${last}.` : ""} The region will be forecast again automatically when publication resumes.`,
+    aboutTitle: "How it works",
+    about: [
+      ["Data: ", "SNS Transparency Portal (daily averages per region) and Open-Meteo weather. The SNS publishes a few days late, so past days not yet published are estimated too."],
+      ["Forecast: ", "average of four models (LightGBM, an LSTM neural network, SARIMAX and the Chronos-2 foundation model), chosen on 2023–2024 and confirmed on 2025–2026, where it was off by about 6 minutes on average."],
+      ["Likely range: ", "not a guarantee: on 8 days out of 10 the actual value falls inside it, and on the other 2 it is above or below."],
+      ["Seasonal normal: ", "average of the same days of the year (± 7 days) in 2023, 2024 and 2025. \"Above normal\" means more than 10 % above; \"well above\", more than 25 %."],
+      ["Note: ", "these are regional averages. They do not say how long the wait is at a given hospital, or in paediatric, obstetric or psychiatric emergency departments."],
+    ],
+    code: "Code, decisions and full evaluation:",
+    emergency: "This page is not medical advice. In an emergency call 112. If in doubt call SNS 24: 808 24 24 24.",
+    regionNames: { "ARS Norte": "North", "ARS Centro": "Centre", "ARS Lisboa e Vale do Tejo": "Lisbon and Tagus Valley", "ARS Alentejo": "Alentejo", "ARS Algarve": "Algarve", "Portugal Continental": "Mainland Portugal" },
+    months: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+    regionLabel: "Region",
+  },
+};
+
+// Nível em relação ao normal: cor de estado sempre acompanhada de ícone e texto.
+const LEVELS = {
+  low: { color: "var(--good)", icon: "▼" },
+  normal: { color: "var(--neutral)", icon: "●" },
+  high: { color: "var(--warning)", icon: "▲" },
+  veryhigh: { color: "var(--serious)", icon: "▲" },
+};
+
+const state = { lang: "pt", target: "wait_minutes", region: "Portugal Continental", range: 7 };
+let DATA = null, ACC = null;
+const T = () => I18N[state.lang];
 const el = (id) => document.getElementById(id);
 const parseDay = (s) => { const [y, m, d] = s.split("-").map(Number); return new Date(y, m - 1, d); };
 const isoDay = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+const addDays = (s, n) => isoDay(new Date(parseDay(s).getTime() + n * 86400000));
 const svgEl = (name, attrs = {}) => { const n = document.createElementNS(SVG_NS, name); for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, v); return n; };
-const unit = () => DATA.targets[state.target].unit;
-const fmtVal = (v) => (v == null ? "—" : fmtNum.format(v));
+const h = (tag, cls, text) => { const n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; };
+const unit = () => T().units[state.target];
+const num = (v) => (v == null ? "—" : new Intl.NumberFormat(T().locale, { maximumFractionDigits: 0 }).format(v));
+const dayShort = (s) => { const d = parseDay(s); return `${d.getDate()} ${T().months[d.getMonth()]}`; };
+const dayLong = (s) => new Intl.DateTimeFormat(T().locale, { weekday: "long", day: "numeric", month: "long" }).format(parseDay(s));
+const weekday = (s) => new Intl.DateTimeFormat(T().locale, { weekday: "short" }).format(parseDay(s)).replace(".", "");
+const regionName = (r) => T().regionNames[r] || r;
+const todayISO = () => isoDay(new Date());
 
-function todayISO() { return isoDay(new Date()); }
-
-function renderStatus() {
-  const s = el("status");
-  s.textContent = "";
-  const last = parseDay(DATA.last_official_day);
-  const run = new Date(DATA.run_at);
-  const parts = [
-    ["Últimos dados oficiais do SNS: ", `${fmtDayLong.format(last)} (publicados com ${DATA.delay_days} dias de atraso)`],
-    ["Previsão calculada: ", run.toLocaleString("pt-PT", { dateStyle: "medium", timeStyle: "short" })],
-  ];
-  for (const [label, value] of parts) {
-    const span = document.createElement("span");
-    span.append(label);
-    const b = document.createElement("strong"); b.textContent = value; span.append(b);
-    s.append(span);
-  }
-  const ageDays = (Date.now() - run.getTime()) / 86400000;
-  if (ageDays > 2) {
-    const warn = document.createElement("span");
-    warn.className = "stale";
-    warn.textContent = "Atenção: a previsão não é atualizada há mais de 2 dias.";
-    s.append(warn);
-  }
+function level(p) {
+  if (p.normal == null) return null;
+  const pct = (p.y - p.normal) / p.normal;
+  return pct < -0.1 ? "low" : pct <= 0.1 ? "normal" : pct <= 0.25 ? "high" : "veryhigh";
 }
 
-function fillSelects() {
-  const t = el("target"), r = el("region");
-  for (const [key, meta] of Object.entries(DATA.targets)) {
-    const o = document.createElement("option"); o.value = key; o.textContent = meta.label; t.append(o);
+function setLang(lang) {
+  state.lang = lang;
+  try { localStorage.setItem("lang", lang); } catch (e) { /* sem armazenamento: vale só para esta visita */ }
+  document.documentElement.lang = T().locale;
+  document.querySelectorAll(".lang button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.lang === lang)));
+  document.querySelectorAll("[data-i18n]").forEach((n) => { const v = T()[n.dataset.i18n]; if (typeof v === "string") n.textContent = v; });
+  el("region").setAttribute("aria-label", T().regionLabel);
+  const list = el("about-list"); list.textContent = "";
+  for (const [k, v] of T().about) { const li = h("li"); li.append(h("strong", null, k), v); list.append(li); }
+  if (DATA) { fillTargets(); fillRegions(); renderStatus(); render(); }
+}
+
+function renderStatus() {
+  const s = el("status"); s.textContent = "";
+  const a = h("span", "pill official"); a.append(`${T().official}: `, h("strong", null, dayLong(DATA.last_official_day)), ` (${T().delay(DATA.delay_days)})`);
+  const run = new Date(DATA.run_at);
+  const b = h("span", "pill"); b.append(`${T().computed}: `, h("strong", null, run.toLocaleString(T().locale, { dateStyle: "medium", timeStyle: "short" })));
+  s.append(a, b);
+  if ((Date.now() - run.getTime()) / 86400000 > 2) s.append(h("span", "stale", T().stale));
+}
+
+function fillTargets() {
+  const seg = el("target-seg"); seg.textContent = "";
+  for (const key of Object.keys(DATA.targets)) {
+    const b = h("button", null, T().targets[key]); b.type = "button"; b.setAttribute("aria-pressed", String(key === state.target));
+    b.addEventListener("click", () => { state.target = key; fillTargets(); fillRegions(); render(); });
+    seg.append(b);
   }
-  t.value = state.target;
-  t.addEventListener("change", () => { state.target = t.value; fillRegions(); render(); });
-  r.addEventListener("change", () => { state.region = r.value; render(); });
-  fillRegions();
-  document.querySelectorAll(".seg button").forEach((b) => b.addEventListener("click", () => {
-    state.range = Number(b.dataset.range);
-    document.querySelectorAll(".seg button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
-    render();
-  }));
 }
 
 function fillRegions() {
-  const r = el("region");
+  const r = el("region"); r.textContent = "";
   const available = Object.keys(DATA.series[state.target]);
-  r.textContent = "";
-  for (const key of DATA.regions.filter((x) => available.includes(x))) {
-    const o = document.createElement("option"); o.value = key; o.textContent = REGION_NAMES[key] || key; r.append(o);
-  }
+  for (const key of DATA.regions.filter((x) => available.includes(x))) { const o = h("option", null, regionName(key)); o.value = key; r.append(o); }
   if (!available.includes(state.region)) state.region = available.includes("Portugal Continental") ? "Portugal Continental" : available[0];
   r.value = state.region;
 }
 
 function visibleForecast(series) {
-  const today = todayISO();
-  const all = series.forecast;
-  if (state.range === 14) return all;
-  // 7 dias: os dias ainda não publicados e hoje + 6 dias.
-  const end = isoDay(new Date(parseDay(today).getTime() + 6 * 86400000));
-  const shown = all.filter((d) => d.kind === "not_yet_published" || d.date <= end);
-  return shown.length ? shown : all.slice(0, 7);
+  if (state.range === 14) return series.forecast;
+  const end = addDays(todayISO(), 6);
+  const shown = series.forecast.filter((d) => d.kind === "not_yet_published" || d.date <= end);
+  return shown.length ? shown : series.forecast.slice(0, 7);
 }
+
+function focusPoint(series) {
+  const today = todayISO(), fc = series.forecast;
+  return fc.find((d) => d.date === today) || fc.find((d) => d.date > today) || fc[fc.length - 1];
+}
+
+function badge(lv) {
+  const b = h("span", "badge"); const ic = h("span", "ic", LEVELS[lv].icon);
+  ic.style.background = LEVELS[lv].color; ic.setAttribute("aria-hidden", "true");
+  b.append(ic, T().levels[lv]); return b;
+}
+
+function keySwatch(cls, style) { const i = h("i", cls); Object.assign(i.style, style); return i; }
 
 function renderHero(series) {
-  const hero = el("hero");
-  hero.textContent = "";
-  const today = todayISO();
-  const fc = series.forecast;
-  const point = fc.find((d) => d.date === today) || fc.find((d) => d.date > today) || fc[fc.length - 1];
+  const hero = el("hero"); hero.textContent = "";
+  const p = focusPoint(series), today = todayISO();
+  const main = h("div", "hero-main");
+  main.append(h("div", "eyebrow", T().forecastFor(p.date === today ? T().today : dayLong(p.date), regionName(state.region))));
+  const big = h("div", "big", num(p.y)); big.append(h("small", null, unit())); main.append(big);
+  const lv = level(p); if (lv) main.append(badge(lv));
+  const range = h("div", "range"); range.append(`${T().likely}: `, h("strong", null, `${num(p.low)}–${num(p.high)} ${unit()}`)); main.append(range);
+  // Régua: faixa provável, previsão e normal na mesma escala.
+  const lo = Math.min(p.low, p.normal ?? p.low), hi = Math.max(p.high, p.normal ?? p.high), pad = (hi - lo) * 0.15 || 1;
+  const pos = (v) => `${(100 * (v - (lo - pad))) / (hi - lo + 2 * pad)}%`;
+  const bar = h("div", "range-bar"); bar.setAttribute("aria-hidden", "true");
+  const band = h("div", "band"); band.style.left = pos(p.low); band.style.right = `calc(100% - ${pos(p.high)})`; bar.append(band);
+  if (p.normal != null) { const nm = h("div", "nm"); nm.style.left = pos(p.normal); bar.append(nm); }
+  const pt = h("div", "pt"); pt.style.left = pos(p.y); bar.append(pt); main.append(bar);
+  const lg = h("div", "range-legend");
+  const item = (sw, text) => { const s = h("span"); s.append(sw, text); lg.append(s); };
+  item(keySwatch("key-box", { background: "var(--series)", borderRadius: "50%", width: "10px", height: "10px" }), T().legendPoint);
+  item(keySwatch("key-box", { background: "var(--series-soft)" }), T().legendRange);
+  if (p.normal != null) item(keySwatch("key-line", { background: "var(--ink-2)", width: "2px", height: "12px" }), `${T().legendNormal} (${num(p.normal)})`);
+  main.append(lg, h("div", "explain", T().likelyExplain));
+
+  const side = h("div", "hero-side");
+  const mini = (k, v, withUnit, s) => { const m = h("div", "mini"); m.append(h("div", "k", k)); const vv = h("div", "v", v); if (withUnit) vv.append(h("small", null, unit())); m.append(vv); if (s) m.append(h("div", "s", s)); side.append(m); };
   const lastObs = [...series.observed].reverse().find((d) => d.value != null);
-
-  const tile = (label, value, sub, extra) => {
-    const t = document.createElement("div"); t.className = "tile";
-    const l = document.createElement("div"); l.className = "label"; l.textContent = label;
-    const v = document.createElement("div"); v.className = "value"; v.textContent = value;
-    const u = document.createElement("small"); u.textContent = unit(); v.append(u);
-    const s = document.createElement("div"); s.className = "sub"; s.textContent = sub;
-    t.append(l, v, s); if (extra) t.append(extra); hero.append(t);
-  };
-
-  const when = point.date === today ? "Hoje" : fmtDayLong.format(parseDay(point.date));
-  let deltaNode = null;
-  if (point.normal != null) {
-    const diff = point.y - point.normal;
-    const pct = Math.round((100 * diff) / point.normal);
-    deltaNode = document.createElement("div"); deltaNode.className = "sub";
-    const strong = document.createElement("span");
-    strong.className = Math.abs(pct) < 5 ? "" : diff > 0 ? "delta-up" : "delta-down";
-    strong.textContent = Math.abs(pct) < 5 ? "Dentro do normal" : `${diff > 0 ? "▲" : "▼"} ${Math.abs(pct)} % ${diff > 0 ? "acima" : "abaixo"} do normal`;
-    deltaNode.append(strong, ` para a época (${fmtVal(point.normal)} ${unit()})`);
+  if (lastObs) mini(T().lastOfficial, num(lastObs.value), true, `${dayLong(lastObs.date)} · ${T().delay(DATA.delay_days)}`);
+  const acc = ACC && ACC.targets[state.target] && ACC.targets[state.target][state.region];
+  if (acc) mini(T().typicalError, `±${num(acc.by_horizon[String(p.horizon)] ?? acc["1-7"])}`, true, T().typicalErrorSub(p.horizon));
+  else if (ACC) mini(T().typicalError, "—", false, T().noError);
+  const models = DATA.models.map((m) => p[m]).filter((v) => v != null);
+  if (models.length > 1) {
+    const spread = Math.max(...models) - Math.min(...models), rel = spread / p.y;
+    mini(T().modelsAgree, T().agree[rel < 0.08 ? "high" : rel < 0.16 ? "mid" : "low"], false, T().agreeSub(num(spread), unit()));
   }
-  tile(`${when}, previsão · ${REGION_NAMES[state.region]}`, fmtVal(point.y),
-       `Intervalo de 80 %: ${fmtVal(point.low)}–${fmtVal(point.high)} ${unit()}`, deltaNode);
-  if (lastObs) tile(`Último valor oficial · ${fmtDay.format(parseDay(lastObs.date))}`, fmtVal(lastObs.value),
-                    `Publicado pelo SNS com ${DATA.delay_days} dias de atraso`);
-  const peak = visibleForecast(series).filter((d) => d.date >= today).reduce((a, b) => (b.y > (a ? a.y : -Infinity) ? b : a), null);
-  if (peak) tile(`Dia mais carregado no período`, fmtVal(peak.y), fmtDayLong.format(parseDay(peak.date)));
+  hero.append(main, side);
 }
+
+function renderDays(series) {
+  const box = el("days"); box.textContent = "";
+  const today = todayISO();
+  for (const d of visibleForecast(series)) {
+    const c = h("div", "day" + (d.date === today ? " today" : "") + (d.kind === "not_yet_published" ? " pending" : ""));
+    c.append(h("div", "dn", d.date === today ? T().today : weekday(d.date)), h("div", "dd", dayShort(d.date)));
+    c.append(h("div", "dv", num(d.y)), h("div", "dr", `${num(d.low)}–${num(d.high)}`));
+    const lv = level(d);
+    if (lv) { const l = h("div", "lvl"); const dot = h("i"); dot.style.background = LEVELS[lv].color; l.append(dot, T().levels[lv]); c.append(l); }
+    if (d.kind === "not_yet_published") c.append(h("div", "tag", T().pendingTag));
+    box.append(c);
+  }
+  // Só desloca se o cartão de hoje não couber à vista (ecrãs estreitos ou 14 dias).
+  box.scrollLeft = 0;
+  const t = box.querySelector(".today");
+  if (t && t.offsetLeft - box.offsetLeft + t.offsetWidth > box.clientWidth) box.scrollLeft = t.offsetLeft - box.offsetLeft - 8;
+}
+
+function niceStep(raw) { const p = Math.pow(10, Math.floor(Math.log10(raw))); const f = raw / p; return (f <= 1 ? 1 : f <= 2 ? 2 : f <= 5 ? 5 : 10) * p; }
 
 function renderChart(series) {
   const svg = el("chart"), wrap = el("chart-wrap"), tip = el("tooltip");
   svg.textContent = "";
-  const W = Math.max(320, wrap.clientWidth), H = W < 560 ? 280 : 340;
+  el("chart-title").textContent = `${T().targetLong[state.target]} · ${regionName(state.region)}`;
+  const W = Math.max(300, wrap.clientWidth), H = W < 560 ? 260 : 320;
   svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
-  const m = { top: 16, right: 16, bottom: 30, left: 44 };
+  const m = { top: 16, right: 14, bottom: 28, left: 46 };
   const iw = W - m.left - m.right, ih = H - m.top - m.bottom;
-
-  const fc = visibleForecast(series);
-  const obs = series.observed.slice(-28);
+  const fc = visibleForecast(series), obs = series.observed.slice(-28);
   const days = [...obs.map((d) => d.date), ...fc.map((d) => d.date)];
   const x0 = parseDay(days[0]).getTime(), x1 = parseDay(days[days.length - 1]).getTime();
   const x = (s) => m.left + ((parseDay(s).getTime() - x0) / (x1 - x0)) * iw;
   const values = [...obs.map((d) => d.value), ...fc.flatMap((d) => [d.low, d.high, d.normal])].filter((v) => v != null);
-  let lo = Math.min(...values), hi = Math.max(...values);
-  const pad = (hi - lo) * 0.08; lo = Math.max(0, lo - pad); hi = hi + pad;
+  let lo = Math.min(...values), hi = Math.max(...values); const pad = (hi - lo) * 0.08; lo = Math.max(0, lo - pad); hi += pad;
   const step = niceStep((hi - lo) / 4); lo = Math.floor(lo / step) * step; hi = Math.ceil(hi / step) * step;
   const y = (v) => m.top + ih - ((v - lo) / (hi - lo)) * ih;
-
-  // Gridlines e eixo y
   for (let v = lo; v <= hi + 1e-9; v += step) {
     svg.append(svgEl("line", { x1: m.left, x2: W - m.right, y1: y(v), y2: y(v), stroke: "var(--grid)", "stroke-width": 1 }));
-    const t = svgEl("text", { x: m.left - 8, y: y(v) + 4, "text-anchor": "end", class: "tick" }); t.textContent = fmtNum.format(v); svg.append(t);
+    const t = svgEl("text", { x: m.left - 8, y: y(v) + 4, "text-anchor": "end", class: "tick" }); t.textContent = num(v); svg.append(t);
   }
-  // Faixa dos dias ainda não publicados
   const pending = fc.filter((d) => d.kind === "not_yet_published");
   if (pending.length) {
-    const half = iw / (days.length - 1) / 2;
-    const xa = x(pending[0].date) - half, xb = x(pending[pending.length - 1].date) + half;
+    const half = iw / (days.length - 1) / 2, xa = x(pending[0].date) - half, xb = x(pending[pending.length - 1].date) + half;
     svg.append(svgEl("rect", { x: xa, y: m.top, width: xb - xa, height: ih, fill: "var(--pending)" }));
-    const t = svgEl("text", { x: (xa + xb) / 2, y: m.top + 12, "text-anchor": "middle", class: "note-text" });
-    t.textContent = "ainda não publicados"; svg.append(t);
-    // Em ecrãs estreitos a etiqueta não cabe na faixa: a legenda já a explica.
+    const t = svgEl("text", { x: (xa + xb) / 2, y: m.top + 12, "text-anchor": "middle", class: "note-text" }); t.textContent = T().pendingBand; svg.append(t);
     if (t.getComputedTextLength() > xb - xa + 8) t.remove();
   }
-  // Marcador de hoje
   const today = todayISO();
   if (today >= days[0] && today <= days[days.length - 1]) {
     svg.append(svgEl("line", { x1: x(today), x2: x(today), y1: m.top, y2: m.top + ih, stroke: "var(--axis)", "stroke-width": 1 }));
-    const t = svgEl("text", { x: x(today) + 4, y: m.top + ih - 6, class: "note-text" }); t.textContent = "hoje"; svg.append(t);
+    const t = svgEl("text", { x: x(today) + 4, y: m.top + ih - 6, class: "note-text" }); t.textContent = T().todayMark; svg.append(t);
   }
-  // Eixo x: uma etiqueta por semana
   svg.append(svgEl("line", { x1: m.left, x2: W - m.right, y1: m.top + ih, y2: m.top + ih, stroke: "var(--axis)", "stroke-width": 1 }));
   const every = Math.ceil(days.length / (W < 560 ? 5 : 8));
-  days.forEach((d, i) => {
-    if (i % every !== 0) return;
-    const t = svgEl("text", { x: x(d), y: H - 8, "text-anchor": "middle", class: "tick" }); t.textContent = fmtDay.format(parseDay(d)); svg.append(t);
-  });
+  days.forEach((d, i) => { if (i % every) return; const t = svgEl("text", { x: x(d), y: H - 8, "text-anchor": "middle", class: "tick" }); t.textContent = dayShort(d); svg.append(t); });
 
   const path = (pts) => pts.map((p, i) => `${i ? "L" : "M"}${p[0].toFixed(1)},${p[1].toFixed(1)}`).join("");
-  // Intervalo (faixa a ~12 %)
   const lastObs = [...obs].reverse().find((d) => d.value != null);
-  const band = [...fc.map((d) => [x(d.date), y(d.high)]), ...[...fc].reverse().map((d) => [x(d.date), y(d.low)])];
-  svg.append(svgEl("path", { d: path(band) + "Z", fill: "var(--series-wash)" }));
-  // Normal para a época
+  svg.append(svgEl("path", { d: path([...fc.map((d) => [x(d.date), y(d.high)]), ...[...fc].reverse().map((d) => [x(d.date), y(d.low)])]) + "Z", fill: "var(--series-wash)" }));
   const normalPts = fc.filter((d) => d.normal != null).map((d) => [x(d.date), y(d.normal)]);
-  if (normalPts.length > 1) svg.append(svgEl("path", { d: path(normalPts), fill: "none", stroke: "var(--normal)", "stroke-width": 1.5, "stroke-linejoin": "round" }));
-  // Observado (segmentos, para não unir lacunas)
-  let seg = [];
-  const flush = () => { if (seg.length > 1) svg.append(svgEl("path", { d: path(seg), fill: "none", stroke: "var(--observed)", "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round" })); seg = []; };
+  if (normalPts.length > 1) svg.append(svgEl("path", { d: path(normalPts), fill: "none", stroke: "var(--normal)", "stroke-width": 1.5 }));
+  let seg = []; const flush = () => { if (seg.length > 1) svg.append(svgEl("path", { d: path(seg), fill: "none", stroke: "var(--observed)", "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round" })); seg = []; };
   obs.forEach((d) => { if (d.value == null) flush(); else seg.push([x(d.date), y(d.value)]); }); flush();
-  // Previsão, ligada ao último valor oficial
-  const fcPts = [...(lastObs ? [[x(lastObs.date), y(lastObs.value)]] : []), ...fc.map((d) => [x(d.date), y(d.y)])];
-  svg.append(svgEl("path", { d: path(fcPts), fill: "none", stroke: "var(--series)", "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round" }));
-  // Pontos finais com anel da cor da superfície
+  svg.append(svgEl("path", { d: path([...(lastObs ? [[x(lastObs.date), y(lastObs.value)]] : []), ...fc.map((d) => [x(d.date), y(d.y)])]), fill: "none", stroke: "var(--series)", "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round" }));
   if (lastObs) svg.append(svgEl("circle", { cx: x(lastObs.date), cy: y(lastObs.value), r: 4, fill: "var(--observed)", stroke: "var(--surface)", "stroke-width": 2 }));
-  const end = fc[fc.length - 1];
-  svg.append(svgEl("circle", { cx: x(end.date), cy: y(end.y), r: 4, fill: "var(--series)", stroke: "var(--surface)", "stroke-width": 2 }));
+  const fp = focusPoint(series);
+  if (fc.includes(fp)) svg.append(svgEl("circle", { cx: x(fp.date), cy: y(fp.y), r: 5, fill: "var(--series)", stroke: "var(--surface)", "stroke-width": 2 }));
 
-  // Hover: linha vertical + tooltip com todos os valores do dia
   const cross = svgEl("line", { y1: m.top, y2: m.top + ih, stroke: "var(--ink-2)", "stroke-width": 1, visibility: "hidden" });
-  const dot = svgEl("circle", { r: 4, fill: "var(--series)", stroke: "var(--surface)", "stroke-width": 2, visibility: "hidden" });
+  const dot = svgEl("circle", { r: 4, stroke: "var(--surface)", "stroke-width": 2, visibility: "hidden" });
   svg.append(cross, dot);
   const byDay = new Map([...obs.map((d) => [d.date, { obs: d }]), ...fc.map((d) => [d.date, { fc: d }])]);
   const hit = svgEl("rect", { x: m.left, y: m.top, width: iw, height: ih, fill: "transparent", tabindex: 0 });
   svg.append(hit);
   const show = (date) => {
     const info = byDay.get(date); if (!info) return;
-    const px = x(date);
-    cross.setAttribute("x1", px); cross.setAttribute("x2", px); cross.setAttribute("visibility", "visible");
+    const px = x(date); cross.setAttribute("x1", px); cross.setAttribute("x2", px); cross.setAttribute("visibility", "visible");
     const v = info.fc ? info.fc.y : info.obs.value;
-    if (v != null) { dot.setAttribute("cx", px); dot.setAttribute("cy", y(v)); dot.setAttribute("fill", info.fc ? "var(--series)" : "var(--observed)"); dot.setAttribute("visibility", "visible"); }
-    else dot.setAttribute("visibility", "hidden");
+    if (v != null) { dot.setAttribute("cx", px); dot.setAttribute("cy", y(v)); dot.setAttribute("fill", info.fc ? "var(--series)" : "var(--observed)"); dot.setAttribute("visibility", "visible"); } else dot.setAttribute("visibility", "hidden");
     tip.textContent = "";
-    const head = document.createElement("div"); head.className = "t-date";
-    head.textContent = fmtDayLong.format(parseDay(date)) + (info.fc ? (info.fc.kind === "not_yet_published" ? " · ainda não publicado" : " · previsão") : " · dado oficial");
-    tip.append(head);
-    const row = (name, value, color) => {
-      const r = document.createElement("div"); r.className = "t-row";
-      const n = document.createElement("span"); n.className = "t-name";
-      if (color) { const k = document.createElement("i"); k.className = "key-line"; k.style.background = color; n.append(k); }
-      n.append(name);
-      const b = document.createElement("b"); b.textContent = value; r.append(n, b); tip.append(r);
-    };
-    if (info.obs) row("Dado oficial", `${fmtVal(info.obs.value)} ${unit()}`, "var(--observed)");
+    tip.append(h("div", "t-date", `${dayLong(date)} · ${info.fc ? (info.fc.kind === "not_yet_published" ? T().tKindPending : T().tKindForecast) : T().tKindOfficial}`));
+    const row = (name, value, color) => { const r = h("div", "t-row"); const n = h("span", "t-name"); if (color) n.append(keySwatch("key-line", { background: color })); n.append(name); r.append(n, h("b", null, value)); tip.append(r); };
+    if (info.obs) row(T().tOfficial, `${num(info.obs.value)} ${unit()}`, "var(--observed)");
     if (info.fc) {
-      row("Previsão", `${fmtVal(info.fc.y)} ${unit()}`, "var(--series)");
-      row("Intervalo 80 %", `${fmtVal(info.fc.low)}–${fmtVal(info.fc.high)}`);
-      if (info.fc.normal != null) row("Normal", `${fmtVal(info.fc.normal)} ${unit()}`, "var(--normal)");
-      const models = document.createElement("div"); models.className = "t-models";
-      models.textContent = DATA.models.map((k) => `${MODEL_NAMES[k]} ${fmtVal(info.fc[k])}`).join(" · ");
-      tip.append(models);
+      row(T().tForecast, `${num(info.fc.y)} ${unit()}`, "var(--series)");
+      row(T().tRange, `${num(info.fc.low)}–${num(info.fc.high)}`);
+      if (info.fc.normal != null) row(T().tNormal, `${num(info.fc.normal)} ${unit()}`, "var(--normal)");
+      tip.append(h("div", "t-models", DATA.models.map((k) => `${MODEL_NAMES[k]} ${num(info.fc[k])}`).join(" · ")));
     }
     tip.style.display = "block";
     const box = wrap.getBoundingClientRect(), scale = box.width / W;
@@ -414,84 +564,83 @@ function renderChart(series) {
     tip.style.left = `${Math.max(0, left)}px`; tip.style.top = `${m.top * scale}px`;
   };
   const hide = () => { cross.setAttribute("visibility", "hidden"); dot.setAttribute("visibility", "hidden"); tip.style.display = "none"; };
-  const nearest = (clientX) => {
-    const box = svg.getBoundingClientRect(); const px = ((clientX - box.left) / box.width) * W;
-    let best = days[0], bestD = Infinity;
-    for (const d of days) { const dd = Math.abs(x(d) - px); if (dd < bestD) { bestD = dd; best = d; } }
-    return best;
-  };
-  let focusIndex = days.length - fc.length;
+  const nearest = (cx) => { const b = svg.getBoundingClientRect(); const px = ((cx - b.left) / b.width) * W; let best = days[0], bd = Infinity; for (const d of days) { const dd = Math.abs(x(d) - px); if (dd < bd) { bd = dd; best = d; } } return best; };
+  let fi = days.length - fc.length;
   hit.addEventListener("pointermove", (e) => show(nearest(e.clientX)));
   hit.addEventListener("pointerleave", hide);
-  hit.addEventListener("focus", () => show(days[focusIndex]));
+  hit.addEventListener("focus", () => show(days[fi]));
   hit.addEventListener("blur", hide);
-  hit.addEventListener("keydown", (e) => {
-    if (e.key === "ArrowRight") focusIndex = Math.min(days.length - 1, focusIndex + 1);
-    else if (e.key === "ArrowLeft") focusIndex = Math.max(0, focusIndex - 1);
-    else return;
-    e.preventDefault(); show(days[focusIndex]);
-  });
-}
-
-function niceStep(raw) {
-  const p = Math.pow(10, Math.floor(Math.log10(raw))); const f = raw / p;
-  return (f <= 1 ? 1 : f <= 2 ? 2 : f <= 5 ? 5 : 10) * p;
+  hit.addEventListener("keydown", (e) => { if (e.key === "ArrowRight") fi = Math.min(days.length - 1, fi + 1); else if (e.key === "ArrowLeft") fi = Math.max(0, fi - 1); else return; e.preventDefault(); show(days[fi]); });
 }
 
 function renderTable(series) {
-  const t = el("table"); const head = t.tHead, body = t.tBodies[0];
-  head.textContent = ""; body.textContent = "";
-  const hr = document.createElement("tr");
-  for (const h of ["Dia", "Tipo", "Previsão", "Intervalo 80 %", "Normal", ...DATA.models.map((k) => MODEL_NAMES[k])]) {
-    const th = document.createElement("th"); th.textContent = h; hr.append(th);
-  }
-  head.append(hr);
+  const t = el("table"); t.tHead.textContent = ""; t.tBodies[0].textContent = "";
+  const hr = h("tr"); for (const c of [...T().th, ...DATA.models.map((k) => MODEL_NAMES[k])]) hr.append(h("th", null, c)); t.tHead.append(hr);
   for (const d of visibleForecast(series)) {
-    const tr = document.createElement("tr");
-    const cells = [fmtDayLong.format(parseDay(d.date)), d.kind === "not_yet_published" ? "Ainda não publicado" : "Previsão",
-      fmtVal(d.y), `${fmtVal(d.low)}–${fmtVal(d.high)}`, fmtVal(d.normal), ...DATA.models.map((k) => fmtVal(d[k]))];
-    for (const c of cells) { const td = document.createElement("td"); td.textContent = c; tr.append(td); }
-    body.append(tr);
+    const tr = h("tr");
+    for (const c of [dayLong(d.date), d.kind === "not_yet_published" ? T().kindPending : T().kindForecast, num(d.y), `${num(d.low)}–${num(d.high)}`, num(d.normal), ...DATA.models.map((k) => num(d[k]))]) tr.append(h("td", null, c));
+    t.tBodies[0].append(tr);
   }
 }
 
-function renderAccuracy() {
-  const p = el("accuracy"); p.textContent = "";
-  const acc = ACC && ACC.targets[state.target] && ACC.targets[state.target][state.region];
-  p.hidden = !ACC;
-  if (!ACC) return;
-  if (!acc) { p.textContent = "Ainda não há medição de erro para esta região: não fez parte da avaliação dos modelos."; return; }
-  p.textContent = `Erro médio desta previsão em ${ACC.period.replace(" em diante", "")} em diante: ±${fmtVal(acc["1-7"])} ${unit()} a 1–7 dias do último dado oficial e ±${fmtVal(acc["8-14"])} ${unit()} a 8–14 dias.`;
+function renderRegions() {
+  const box = el("regions"); box.textContent = "";
+  const all = DATA.series[state.target];
+  const ref = focusPoint(all[state.region] || Object.values(all)[0]);
+  el("regions-title").textContent = T().regionsTitle(ref.date === todayISO() ? T().today : dayLong(ref.date));
+  const rows = DATA.regions.map((r) => ({ r, p: all[r] ? all[r].forecast.find((d) => d.date === ref.date) : null }));
+  const national = rows.filter((x) => x.r === "Portugal Continental"), regional = rows.filter((x) => x.r !== "Portugal Continental");
+  // As regiões partilham uma escala; nos episódios, o total nacional tem a sua (é a soma das regiões).
+  const scaleMax = (list) => Math.max(1, ...list.filter((x) => x.p).flatMap((x) => [x.p.y, x.p.normal ?? 0])) * 1.08;
+  const regMax = scaleMax(regional), natMax = state.target === "episodes" ? scaleMax(national) : Math.max(regMax, scaleMax(national));
+  const draw = (x, max) => {
+    const b = h("button", "reg"); b.type = "button"; b.setAttribute("aria-pressed", String(x.r === state.region));
+    b.append(h("span", "rn", regionName(x.r)));
+    const track = h("span", "track");
+    if (x.p) {
+      const bar = h("span", "bar"); bar.style.width = `${(100 * x.p.y) / max}%`; track.append(bar);
+      if (x.p.normal != null) { const nm = h("span", "nmk"); nm.style.left = `${(100 * x.p.normal) / max}%`; track.append(nm); }
+      b.title = `${regionName(x.r)}: ${num(x.p.y)} ${unit()} (${T().normalFor(num(x.p.normal), unit())})`;
+      b.addEventListener("click", () => { state.region = x.r; el("region").value = x.r; render(); window.scrollTo({ top: 0, behavior: "smooth" }); });
+    } else b.disabled = true;
+    b.append(track, h("span", "rv", x.p ? num(x.p.y) : T().noForecast));
+    box.append(b);
+  };
+  regional.forEach((x) => draw(x, regMax));
+  if (national.length) { box.append(h("div", "reg-sep")); national.forEach((x) => draw(x, natMax)); }
 }
 
 function renderInactive() {
   const box = el("inactive"); const list = DATA.inactive[state.target] || [];
   box.hidden = list.length === 0; box.textContent = "";
-  for (const r of list) {
-    const p = document.createElement("p");
-    const since = r.last_value ? ` O último valor publicado é de ${fmtDayLong.format(parseDay(r.last_value))}.` : "";
-    p.textContent = `${REGION_NAMES[r.ars] || r.ars}: sem dados recentes de ${DATA.targets[state.target].label.toLowerCase()} publicados pelo SNS, por isso não há previsão.${since} A região volta a ser prevista automaticamente quando o SNS retomar a publicação.`;
-    box.append(p);
-  }
+  for (const r of list) box.append(h("p", null, T().inactive(regionName(r.ars), T().targetLower[state.target], r.last_value ? dayLong(r.last_value) : null)));
 }
 
 function render() {
   const series = DATA.series[state.target][state.region];
-  el("chart-title").textContent = `${DATA.targets[state.target].label} · ${REGION_NAMES[state.region]}`;
-  renderHero(series); renderChart(series); renderTable(series); renderAccuracy(); renderInactive();
+  renderHero(series); renderDays(series); renderChart(series); renderTable(series); renderRegions(); renderInactive();
 }
 
 async function load() {
+  let lang = "pt";
+  // Prioridade: ?lang=en no endereço, depois a escolha guardada, depois o idioma do browser.
+  const fromUrl = new URLSearchParams(location.search).get("lang");
+  try { lang = fromUrl || localStorage.getItem("lang") || (navigator.language || "pt").slice(0, 2); } catch (e) { lang = fromUrl || "pt"; }
+  setLang(I18N[lang] ? lang : "pt");
+  el("status").textContent = T().loading;
+  document.querySelectorAll(".lang button").forEach((b) => b.addEventListener("click", () => setLang(b.dataset.lang)));
+  el("region").addEventListener("change", (e) => { state.region = e.target.value; render(); });
+  document.querySelectorAll("#range-seg button").forEach((b) => b.addEventListener("click", () => {
+    state.range = Number(b.dataset.range);
+    document.querySelectorAll("#range-seg button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+    render();
+  }));
   try {
     const [f, a] = await Promise.all([fetch("data/forecast.json", { cache: "no-cache" }), fetch("data/accuracy.json", { cache: "no-cache" })]);
-    DATA = await f.json();
-    ACC = a.ok ? await a.json() : null;
-  } catch (e) {
-    el("status").textContent = "Não foi possível carregar a previsão.";
-    return;
-  }
-  renderStatus(); fillSelects(); render();
-  let resizeTimer; window.addEventListener("resize", () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(render, 150); });
+    DATA = await f.json(); ACC = a.ok ? await a.json() : null;
+  } catch (e) { el("status").textContent = T().loadError; return; }
+  fillTargets(); fillRegions(); renderStatus(); render();
+  let timer; window.addEventListener("resize", () => { clearTimeout(timer); timer = setTimeout(render, 150); });
 }
 load();
 </script>

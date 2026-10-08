@@ -477,7 +477,14 @@ The delay decides which horizons the published forecast really needs. If the lat
   - the next 7 days by default and a "up to 14 days" button;
   - a table view, the measured error, inactive regions with the date of their last value, and a medical disclaimer (112, SNS 24).
 - **Publishing:** the `predict.yml` workflow publishes with `actions/deploy-pages` after each forecast. It does not rely on a commit triggering Pages, because pushes made by `GITHUB_TOKEN` do not trigger other workflows.
-- Checked in light mode, dark mode and at 390 px width.
+- **Redesign (same day):** the main number is shown with a level badge against the seasonal normal: below (< −10 %), normal, above (> +10 %), well above (> +25 %). Each level is shown with an icon and a label, never colour alone. The redesign also adds:
+  - a range bar showing the likely range, the forecast and the normal;
+  - the typical error at that horizon and the agreement between the four models;
+  - a "day by day" strip, like a weather forecast;
+  - "today in every region" as bars with the seasonal normal marked;
+  - plain wording for the interval ("likely range: on 8 days out of 10 the actual value falls inside it").
+- **Languages:** Portuguese and English (PT | EN toggle, `?lang=en` in the address, remembered per browser).
+- Checked in light mode, dark mode, English, and at 390 px width.
 
 **Consequences.**
 - There is no extra account or service, and nothing to wake up: the page loads instantly and costs nothing.
