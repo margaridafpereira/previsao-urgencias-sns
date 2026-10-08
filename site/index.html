@@ -26,10 +26,12 @@
     --good: #0ca30c;
     --warning: #fab219;
     --serious: #ec835a;
-    --neutral: #898781;
     --critical: #d03b3b;
-    --shadow: 0 1px 2px rgba(16, 42, 84, 0.05), 0 6px 20px rgba(16, 42, 84, 0.06);
-    --brand: #1c5cab;
+    --brand-1: #0d366b;
+    --brand-2: #1c5cab;
+    --on-brand: #ffffff;
+    --on-brand-2: rgba(255, 255, 255, 0.78);
+    --shadow: 0 1px 2px rgba(16, 42, 84, 0.05), 0 8px 24px rgba(16, 42, 84, 0.07);
   }
   @media (prefers-color-scheme: dark) {
     :root:where(:not([data-theme="light"])) {
@@ -37,7 +39,8 @@
       --page: #0d0d0d; --surface: #1a1a19; --surface-2: #232321; --ink: #ffffff; --ink-2: #c3c2b7; --muted: #a3a29b;
       --grid: #2c2c2a; --axis: #383835; --border: rgba(255, 255, 255, 0.10);
       --series: #3987e5; --series-wash: rgba(57, 135, 229, 0.18); --series-soft: #184f95;
-      --observed: #c3c2b7; --normal: #898781; --pending: rgba(195, 194, 183, 0.08); --shadow: none; --brand: #3987e5;
+      --observed: #c3c2b7; --normal: #898781; --pending: rgba(195, 194, 183, 0.08);
+      --brand-1: #0b2447; --brand-2: #184f95; --shadow: none;
     }
   }
   :root[data-theme="dark"] {
@@ -45,76 +48,110 @@
     --page: #0d0d0d; --surface: #1a1a19; --surface-2: #232321; --ink: #ffffff; --ink-2: #c3c2b7; --muted: #a3a29b;
     --grid: #2c2c2a; --axis: #383835; --border: rgba(255, 255, 255, 0.10);
     --series: #3987e5; --series-wash: rgba(57, 135, 229, 0.18); --series-soft: #184f95;
-    --observed: #c3c2b7; --normal: #898781; --pending: rgba(195, 194, 183, 0.08); --shadow: none; --brand: #3987e5;
+    --observed: #c3c2b7; --normal: #898781; --pending: rgba(195, 194, 183, 0.08);
+    --brand-1: #0b2447; --brand-2: #184f95; --shadow: none;
   }
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--page); color: var(--ink); font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
-  main { max-width: 1040px; margin: 0 auto; padding: 20px 16px 48px; }
   button, select { font: inherit; color: inherit; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 16px; }
 
+  /* Faixa do cabeçalho */
+  header.banner { background: linear-gradient(135deg, var(--brand-1), var(--brand-2)); color: var(--on-brand); padding: 22px 0 72px; }
   .top { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
-  h1 { font-size: 1.7rem; line-height: 1.2; margin: 0; font-weight: 700; letter-spacing: -0.01em; display: flex; align-items: center; gap: 12px; }
-  h1 .logo { width: 40px; height: 40px; border-radius: 12px; background: var(--brand); color: #fff; display: inline-grid; place-items: center; font-size: 1.3rem; flex-shrink: 0; }
-  .lede { color: var(--ink-2); margin: 6px 0 16px; max-width: 720px; }
-  .lang { display: inline-flex; border: 1px solid var(--border); border-radius: 999px; overflow: hidden; flex-shrink: 0; background: var(--surface); }
-  .lang button { border: 0; background: transparent; padding: 4px 12px; cursor: pointer; font-size: 0.85rem; font-weight: 600; color: var(--ink-2); min-height: 32px; }
-  .lang button[aria-pressed="true"] { background: var(--ink); color: var(--surface); }
+  h1 { font-size: 1.75rem; line-height: 1.2; margin: 0; font-weight: 750; letter-spacing: -0.015em; display: flex; align-items: center; gap: 12px; }
+  h1 .logo { width: 42px; height: 42px; border-radius: 12px; background: rgba(255,255,255,0.16); display: inline-grid; place-items: center; font-size: 1.35rem; flex-shrink: 0; }
+  .lede { color: var(--on-brand-2); margin: 8px 0 14px; max-width: 700px; }
+  .lang { display: inline-flex; border: 1px solid rgba(255,255,255,0.35); border-radius: 999px; overflow: hidden; flex-shrink: 0; }
+  .lang button { border: 0; background: transparent; padding: 4px 12px; cursor: pointer; font-size: 0.85rem; font-weight: 650; color: var(--on-brand); min-height: 32px; }
+  .lang button[aria-pressed="true"] { background: var(--on-brand); color: var(--brand-1); }
+  .status { display: flex; flex-wrap: wrap; gap: 8px; font-size: 0.85rem; }
+  .status .pill { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; background: rgba(255,255,255,0.12); color: var(--on-brand-2); }
+  .status .pill strong { color: var(--on-brand); font-weight: 650; }
+  .status .stale { background: var(--critical); color: #fff; }
 
-  .status { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 18px; font-size: 0.88rem; color: var(--ink-2); margin-bottom: 16px; }
-  .status .pill { display: inline-flex; align-items: center; gap: 6px; }
-  .status .pill::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--series); flex-shrink: 0; }
-  .status .pill.official::before { background: var(--observed); }
-  .status strong { color: var(--ink); font-weight: 600; }
-  .stale { color: var(--critical); font-weight: 600; }
-
-  .filters { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; margin-bottom: 16px; }
+  /* Barra de filtros sobre a faixa */
+  .toolbar { margin-top: -52px; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 10px; display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: center; box-shadow: var(--shadow); position: relative; }
   .seg { display: inline-flex; background: var(--surface-2); border-radius: 10px; padding: 3px; gap: 2px; }
   .seg button { border: 0; background: transparent; border-radius: 8px; padding: 6px 12px; cursor: pointer; min-height: 34px; color: var(--ink-2); font-size: 0.92rem; }
-  .seg button[aria-pressed="true"] { background: var(--surface); color: var(--ink); font-weight: 600; box-shadow: 0 1px 2px rgba(0,0,0,0.12); }
-  select { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 6px 10px; min-height: 40px; font-size: 0.95rem; }
+  .seg button[aria-pressed="true"] { background: var(--surface); color: var(--ink); font-weight: 650; box-shadow: 0 1px 3px rgba(0,0,0,0.14); }
+  select { background: var(--surface-2); border: 0; border-radius: 10px; padding: 6px 10px; min-height: 40px; font-size: 0.95rem; font-weight: 600; }
 
-  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 18px; margin-bottom: 16px; box-shadow: var(--shadow); }
-  .card h2 { font-size: 1.05rem; margin: 0 0 4px; font-weight: 650; }
-  .card .hint { font-size: 0.85rem; color: var(--muted); margin: 0 0 12px; }
+  main { padding: 16px 0 48px; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 20px; margin-bottom: 16px; box-shadow: var(--shadow); }
+  .card h2 { font-size: 1.08rem; margin: 0 0 4px; font-weight: 700; }
+  .hint { font-size: 0.85rem; color: var(--muted); margin: 0 0 14px; }
+  .grid-top { display: grid; grid-template-columns: 1.5fr 1fr; gap: 16px; }
+  .grid-top .card { margin-bottom: 0; }
+  .grid-top { margin-bottom: 16px; }
 
-  .hero { display: grid; grid-template-columns: 1.4fr 1fr; gap: 20px; border-left: 6px solid var(--level, var(--series)); }
-  .hero-main { display: flex; flex-direction: column; gap: 8px; }
-  .eyebrow { font-size: 0.9rem; color: var(--ink-2); font-weight: 500; }
-  .big { font-size: 4.2rem; line-height: 1; font-weight: 700; letter-spacing: -0.02em; }
-  .big small { font-size: 1.2rem; font-weight: 500; color: var(--ink-2); margin-left: 6px; letter-spacing: 0; }
-  .range { font-size: 1rem; color: var(--ink-2); }
-  .range strong { color: var(--ink); font-weight: 600; }
-  .explain { font-size: 0.82rem; color: var(--muted); }
-  .range-bar { position: relative; height: 10px; border-radius: 5px; background: var(--surface-2); margin: 8px 0 2px; max-width: 380px; }
-  .range-bar .band { position: absolute; top: 0; bottom: 0; border-radius: 5px; background: var(--series-soft); }
-  .range-bar .pt { position: absolute; top: -3px; width: 16px; height: 16px; margin-left: -8px; border-radius: 50%; background: var(--series); border: 2px solid var(--surface); }
-  .range-bar .nm { position: absolute; top: -5px; bottom: -5px; width: 2px; margin-left: -1px; background: var(--ink-2); border-radius: 1px; }
+  /* Destaque principal */
+  .hero { position: relative; overflow: hidden; display: flex; flex-direction: column; gap: 10px; }
+  .hero::before { content: ""; position: absolute; inset: 0 auto 0 0; width: 6px; background: var(--level, var(--series)); }
+  .eyebrow { font-size: 0.92rem; color: var(--ink-2); font-weight: 600; }
+  .big-row { display: flex; align-items: flex-end; gap: 16px; flex-wrap: wrap; }
+  .big { font-size: 5rem; line-height: 0.95; font-weight: 800; letter-spacing: -0.03em; font-variant-numeric: lining-nums; }
+  .big small { font-size: 1.3rem; font-weight: 600; color: var(--ink-2); margin-left: 6px; letter-spacing: 0; }
+  .badge { display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px 6px 6px; border-radius: 999px; background: color-mix(in srgb, var(--level) 16%, var(--surface)); font-weight: 650; font-size: 0.95rem; width: fit-content; }
+  .badge .ic { width: 24px; height: 24px; border-radius: 50%; display: inline-grid; place-items: center; color: #fff; font-size: 0.7rem; line-height: 1; background: var(--level); }
+  .range { font-size: 1.02rem; color: var(--ink-2); }
+  .range strong { color: var(--ink); font-weight: 650; }
+  .range-bar { position: relative; height: 12px; border-radius: 6px; background: var(--surface-2); margin: 4px 0 0; max-width: 440px; }
+  .range-bar .band { position: absolute; top: 0; bottom: 0; border-radius: 6px; background: var(--series-soft); }
+  .range-bar .pt { position: absolute; top: -4px; width: 20px; height: 20px; margin-left: -10px; border-radius: 50%; background: var(--series); border: 3px solid var(--surface); box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+  .range-bar .nm { position: absolute; top: -6px; bottom: -6px; width: 2px; margin-left: -1px; background: var(--ink-2); border-radius: 1px; }
   .range-legend { font-size: 0.78rem; color: var(--muted); display: flex; gap: 14px; flex-wrap: wrap; }
   .range-legend span { display: inline-flex; align-items: center; gap: 5px; }
-  .badge { display: inline-flex; align-items: center; gap: 8px; padding: 5px 12px 5px 6px; border-radius: 999px; background: color-mix(in srgb, var(--level) 16%, var(--surface)); font-weight: 600; font-size: 0.92rem; width: fit-content; }
-  .badge.sm { font-size: 0.75rem; padding: 2px 8px 2px 3px; gap: 5px; font-weight: 600; }
-  .badge.sm .ic { width: 16px; height: 16px; font-size: 0.55rem; }
-  .badge .ic { width: 22px; height: 22px; border-radius: 50%; display: inline-grid; place-items: center; color: #fff; font-size: 0.7rem; line-height: 1; }
-  .hero-side { display: grid; gap: 10px; align-content: start; }
-  .mini { background: var(--surface-2); border-radius: 10px; padding: 10px 12px; }
-  .mini .k { font-size: 0.8rem; color: var(--ink-2); }
-  .mini .v { font-size: 1.35rem; font-weight: 650; }
-  .mini .v small { font-size: 0.85rem; font-weight: 500; color: var(--ink-2); margin-left: 3px; }
-  .mini .s { font-size: 0.8rem; color: var(--muted); }
+  .explain { font-size: 0.82rem; color: var(--muted); }
 
-  .days { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(92px, 1fr); gap: 8px; overflow-x: auto; padding-bottom: 6px; scroll-snap-type: x proximity; }
-  .day { border: 1px solid var(--border); border-top: 5px solid var(--level, var(--border)); border-radius: 12px; padding: 10px 8px; text-align: center; background: var(--surface); scroll-snap-align: start; }
+  /* Mapa esquemático */
+  .map { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }
+  .tile { border: 0; border-radius: 12px; padding: 10px 12px; text-align: left; cursor: pointer; background: color-mix(in srgb, var(--level, var(--surface-2)) 14%, var(--surface)); box-shadow: inset 4px 0 0 var(--level, var(--axis)); transition: transform .12s ease, box-shadow .12s ease; display: grid; grid-template-columns: 1fr auto; align-items: baseline; column-gap: 8px; padding: 8px 12px; }
+  .tile:hover:not(:disabled) { transform: translateY(-1px); }
+  .tile[aria-pressed="true"] { box-shadow: inset 4px 0 0 var(--level, var(--axis)), 0 0 0 2px var(--series); }
+  .tile .tn { font-size: 0.82rem; font-weight: 650; color: var(--ink-2); }
+  .tile .tv { font-size: 1.25rem; font-weight: 800; line-height: 1.15; text-align: right; }
+  .tile .tv small { font-size: 0.75rem; font-weight: 600; color: var(--ink-2); margin-left: 3px; }
+  .tile .tl { font-size: 0.72rem; color: var(--ink-2); display: inline-flex; align-items: center; gap: 4px; grid-column: 1 / -1; }
+  .tile .tl i { width: 8px; height: 8px; border-radius: 50%; background: var(--level); display: inline-block; }
+  .tile:disabled { cursor: default; background: var(--surface-2); box-shadow: none; }
+  .tile:disabled .tv { font-size: 0.85rem; font-weight: 500; color: var(--muted); }
+  .t-norte { grid-column: 1 / 6; }
+  .t-centro { grid-column: 1 / 6; }
+  .t-lvt { grid-column: 1 / 5; }
+  .t-alentejo { grid-column: 2 / 7; }
+  .t-algarve { grid-column: 2 / 6; }
+  .t-pt { grid-column: 1 / 7; margin-top: 6px; }
+  .map-note { font-size: 0.75rem; color: var(--muted); margin-top: 8px; }
+
+  /* Estatísticas (dentro do cartão principal) */
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: auto; padding-top: 14px; border-top: 1px solid var(--grid); }
+  .stat { display: flex; gap: 10px; align-items: flex-start; background: var(--surface-2); border-radius: 12px; padding: 10px; }
+  .stat .si { width: 34px; height: 34px; border-radius: 10px; background: var(--surface); display: grid; place-items: center; flex-shrink: 0; color: var(--series); }
+  .stat .si svg { width: 18px; height: 18px; }
+  .stat .k { font-size: 0.82rem; color: var(--ink-2); }
+  .stat .v { font-size: 1.3rem; font-weight: 750; line-height: 1.2; }
+  .stat .v small { font-size: 0.85rem; font-weight: 600; color: var(--ink-2); margin-left: 3px; }
+  .stat .s { font-size: 0.76rem; color: var(--muted); line-height: 1.3; }
+
+  /* Dia a dia */
+  .days { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(92px, 1fr); gap: 8px; overflow-x: auto; padding: 2px 2px 8px; scroll-snap-type: x proximity; }
+  .day { border: 1px solid var(--border); border-radius: 14px; padding: 10px 8px 8px; text-align: center; background: var(--surface); scroll-snap-align: start; display: flex; flex-direction: column; align-items: center; }
   .day.today { box-shadow: 0 0 0 2px var(--series); }
   .day.today .dn { color: var(--series); }
   .day.pending { background: var(--surface-2); }
-  .day .dn { font-size: 0.82rem; font-weight: 650; color: var(--ink); text-transform: capitalize; }
-  .day .dd { font-size: 0.75rem; color: var(--muted); }
-  .day .dv { font-size: 1.5rem; font-weight: 700; margin: 6px 0 0; line-height: 1.1; }
+  .day .dn { font-size: 0.82rem; font-weight: 700; text-transform: capitalize; }
+  .day .dd { font-size: 0.74rem; color: var(--muted); }
+  .day .meter { width: 14px; height: 56px; border-radius: 7px; background: var(--surface-2); margin: 8px 0 6px; position: relative; overflow: hidden; }
+  .day.pending .meter { background: var(--surface); }
+  .day .meter span { position: absolute; left: 0; right: 0; bottom: 0; border-radius: 7px; background: var(--level, var(--series)); transition: height .5s ease; }
+  .day .dv { font-size: 1.4rem; font-weight: 800; line-height: 1.1; }
   .day .dr { font-size: 0.72rem; color: var(--muted); font-variant-numeric: tabular-nums; }
-  .day .lvl { display: inline-flex; align-items: center; gap: 4px; font-size: 0.72rem; color: var(--ink-2); margin-top: 6px; line-height: 1.2; }
-  .day .lvl i { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
-  .day .tag { font-size: 0.68rem; color: var(--muted); margin-top: 4px; font-style: italic; }
+  .day .lvl { display: inline-flex; align-items: center; gap: 4px; font-size: 0.72rem; color: var(--ink-2); margin-top: 4px; }
+  .day .lvl i { width: 8px; height: 8px; border-radius: 50%; display: inline-block; background: var(--level); }
+  .day .tag { font-size: 0.66rem; color: var(--muted); margin-top: 4px; font-style: italic; line-height: 1.2; }
 
+  /* Gráfico */
   .chart-head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
   .legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 0.82rem; color: var(--ink-2); }
   .legend span { display: inline-flex; align-items: center; gap: 6px; }
@@ -130,60 +167,54 @@
   .tooltip .t-row b { font-variant-numeric: tabular-nums; }
   .tooltip .t-name { display: inline-flex; align-items: center; gap: 6px; color: var(--ink-2); }
   .tooltip .t-models { margin-top: 4px; padding-top: 4px; border-top: 1px solid var(--border); color: var(--ink-2); font-size: 0.78rem; }
-
-  .regions { display: grid; gap: 4px; }
-  .reg { display: grid; grid-template-columns: minmax(110px, 200px) 1fr 70px minmax(150px, auto); align-items: center; gap: 12px; padding: 7px 8px; border-radius: 10px; border: 0; background: transparent; cursor: pointer; text-align: left; }
-  .reg:hover:not(:disabled) { background: var(--surface-2); }
-  .reg[aria-pressed="true"] { background: var(--surface-2); }
-  .reg .rn { font-size: 0.92rem; }
-  .reg[aria-pressed="true"] .rn { font-weight: 650; }
-  .reg .track { position: relative; height: 18px; }
-  .reg .bar { position: absolute; left: 0; top: 0; height: 18px; border-radius: 0 4px 4px 0; background: var(--series); }
-  .reg .nmk { position: absolute; top: -3px; height: 24px; width: 2px; margin-left: -1px; background: var(--ink); border-radius: 1px; opacity: 0.7; }
-  .reg .rv { font-weight: 650; font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
-  .reg:disabled { cursor: default; }
-  .reg:disabled .rn, .reg:disabled .rv { color: var(--muted); font-weight: 400; }
-  .reg.sep { margin-top: 6px; }
-  .reg-sep { height: 1px; background: var(--grid); margin: 4px 8px; }
-
   details summary { cursor: pointer; color: var(--ink-2); font-size: 0.9rem; margin-top: 8px; }
   .table-scroll { overflow-x: auto; }
   table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 0.88rem; }
   th, td { text-align: right; padding: 6px 8px; border-bottom: 1px solid var(--grid); font-variant-numeric: tabular-nums; white-space: nowrap; }
   th:first-child, td:first-child, th:nth-child(2), td:nth-child(2) { text-align: left; }
   th { color: var(--muted); font-weight: 500; }
+
   .notice p { margin: 0; color: var(--ink-2); font-size: 0.92rem; }
   .notice p + p { margin-top: 8px; }
   .about ul { padding-left: 20px; margin: 8px 0; }
   .about li, .about p { color: var(--ink-2); font-size: 0.92rem; }
   .about a { color: var(--series); }
-  .emergency { display: flex; gap: 10px; align-items: flex-start; background: var(--surface-2); border-radius: 10px; padding: 10px 12px; color: var(--ink); font-weight: 600; font-size: 0.92rem; margin-top: 12px; }
-  @media (max-width: 760px) {
-    .hero { grid-template-columns: 1fr; }
-    .big { font-size: 3.3rem; }
-    h1 { font-size: 1.4rem; }
-    .reg { grid-template-columns: 104px 1fr 52px 24px; gap: 8px; }
-    .reg .badge.sm .lbl { display: none; }
-    .reg .badge.sm { padding: 2px; }
+  .emergency { display: flex; gap: 12px; align-items: center; background: color-mix(in srgb, var(--critical) 10%, var(--surface)); border-radius: 12px; padding: 12px 14px; color: var(--ink); font-weight: 650; font-size: 0.92rem; margin-top: 12px; }
+  .emergency .ei { width: 32px; height: 32px; border-radius: 50%; background: var(--critical); color: #fff; display: grid; place-items: center; flex-shrink: 0; }
+  footer { text-align: center; font-size: 0.8rem; color: var(--muted); padding: 0 0 32px; }
+
+  @media (max-width: 860px) {
+    .grid-top { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 640px) { .stats { grid-template-columns: 1fr; } }
+  @media (max-width: 560px) {
+    h1 { font-size: 1.35rem; }
+    .big { font-size: 3.8rem; }
+    header.banner { padding-bottom: 64px; }
+    .card { padding: 16px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .tile, .day .meter span { transition: none; }
   }
 </style>
 </head>
 <body>
-<main>
-  <div class="top">
-    <div>
+<header class="banner">
+  <div class="wrap">
+    <div class="top">
       <h1><span class="logo" aria-hidden="true">✚</span><span data-i18n="title"></span></h1>
-      <p class="lede" data-i18n="lede"></p>
+      <div class="lang" role="group" aria-label="Idioma / Language">
+        <button type="button" data-lang="pt" aria-pressed="true">PT</button>
+        <button type="button" data-lang="en" aria-pressed="false">EN</button>
+      </div>
     </div>
-    <div class="lang" role="group" aria-label="Idioma / Language">
-      <button type="button" data-lang="pt" aria-pressed="true">PT</button>
-      <button type="button" data-lang="en" aria-pressed="false">EN</button>
-    </div>
+    <p class="lede" data-i18n="lede"></p>
+    <div class="status" id="status" aria-live="polite"></div>
   </div>
+</header>
 
-  <div class="status" id="status" aria-live="polite"></div>
-
-  <div class="filters">
+<div class="wrap">
+  <div class="toolbar">
     <div class="seg" role="group" id="target-seg"></div>
     <select id="region"></select>
     <div class="seg" role="group" id="range-seg">
@@ -192,65 +223,72 @@
     </div>
   </div>
 
-  <section class="card hero" id="hero" aria-live="polite"></section>
-
-  <section class="card">
-    <h2 data-i18n="daysTitle"></h2>
-    <p class="hint" data-i18n="daysHint"></p>
-    <div class="days" id="days"></div>
-  </section>
-
-  <section class="card">
-    <div class="chart-head">
-      <div>
-        <h2 id="chart-title"></h2>
-        <p class="hint" data-i18n="chartHint"></p>
-      </div>
-      <div class="legend">
-        <span><i class="key-line" style="background:var(--observed)"></i><span data-i18n="lgOfficial"></span></span>
-        <span><i class="key-line" style="background:var(--series)"></i><span data-i18n="lgForecast"></span></span>
-        <span><i class="key-box" style="background:var(--series-wash)"></i><span data-i18n="lgRange"></span></span>
-        <span><i class="key-line" style="background:var(--normal);height:1.5px"></i><span data-i18n="lgNormal"></span></span>
-        <span><i class="key-box" style="background:var(--pending);outline:1px solid var(--border)"></i><span data-i18n="lgPending"></span></span>
-      </div>
+  <main>
+    <div class="grid-top">
+      <section class="card hero" id="hero" aria-live="polite"></section>
+      <section class="card">
+        <h2 id="map-title"></h2>
+        <p class="hint" data-i18n="mapHint"></p>
+        <div class="map" id="map"></div>
+        <p class="map-note" data-i18n="mapNote"></p>
+      </section>
     </div>
-    <div class="chart-wrap" id="chart-wrap">
-      <svg id="chart" role="img" aria-labelledby="chart-title"></svg>
-      <div class="tooltip" id="tooltip" role="status"></div>
-    </div>
-    <details>
-      <summary data-i18n="showTable"></summary>
-      <div class="table-scroll"><table id="table"><thead></thead><tbody></tbody></table></div>
-    </details>
-  </section>
 
-  <section class="card">
-    <h2 id="regions-title"></h2>
-    <p class="hint" data-i18n="regionsHint"></p>
-    <div class="regions" id="regions"></div>
-  </section>
+    <section class="card">
+      <h2 data-i18n="daysTitle"></h2>
+      <p class="hint" data-i18n="daysHint"></p>
+      <div class="days" id="days"></div>
+    </section>
 
-  <section class="card notice" id="inactive" hidden></section>
+    <section class="card">
+      <div class="chart-head">
+        <div>
+          <h2 id="chart-title"></h2>
+          <p class="hint" data-i18n="chartHint"></p>
+        </div>
+        <div class="legend">
+          <span><i class="key-line" style="background:var(--observed)"></i><span data-i18n="lgOfficial"></span></span>
+          <span><i class="key-line" style="background:var(--series)"></i><span data-i18n="lgForecast"></span></span>
+          <span><i class="key-box" style="background:var(--series-wash)"></i><span data-i18n="lgRange"></span></span>
+          <span><i class="key-line" style="background:var(--normal);height:1.5px"></i><span data-i18n="lgNormal"></span></span>
+          <span><i class="key-box" style="background:var(--pending);outline:1px solid var(--border)"></i><span data-i18n="lgPending"></span></span>
+        </div>
+      </div>
+      <div class="chart-wrap" id="chart-wrap">
+        <svg id="chart" role="img" aria-labelledby="chart-title"></svg>
+        <div class="tooltip" id="tooltip" role="status"></div>
+      </div>
+      <details>
+        <summary data-i18n="showTable"></summary>
+        <div class="table-scroll"><table id="table"><thead></thead><tbody></tbody></table></div>
+      </details>
+    </section>
 
-  <section class="card about">
-    <h2 data-i18n="aboutTitle"></h2>
-    <ul id="about-list"></ul>
-    <p><span data-i18n="code"></span> <a href="https://github.com/margaridafpereira/previsao-urgencias-sns">github.com/margaridafpereira/previsao-urgencias-sns</a></p>
-    <div class="emergency"><span aria-hidden="true">✚</span><span data-i18n="emergency"></span></div>
-  </section>
-</main>
+    <section class="card notice" id="inactive" hidden></section>
+
+    <section class="card about">
+      <h2 data-i18n="aboutTitle"></h2>
+      <ul id="about-list"></ul>
+      <p><span data-i18n="code"></span> <a href="https://github.com/margaridafpereira/previsao-urgencias-sns">github.com/margaridafpereira/previsao-urgencias-sns</a></p>
+      <div class="emergency"><span class="ei" aria-hidden="true">✚</span><span data-i18n="emergency"></span></div>
+    </section>
+  </main>
+</div>
+<footer data-i18n="footer"></footer>
 
 <script>
 "use strict";
 const SVG_NS = "http://www.w3.org/2000/svg";
 const MODEL_NAMES = { lightgbm: "LightGBM", lstm: "LSTM", sarimax: "SARIMAX", chronos2: "Chronos-2" };
+const TILE_CLASS = { "ARS Norte": "t-norte", "ARS Centro": "t-centro", "ARS Lisboa e Vale do Tejo": "t-lvt", "ARS Alentejo": "t-alentejo", "ARS Algarve": "t-algarve", "Portugal Continental": "t-pt" };
+const REDUCED_MOTION = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 const I18N = {
   pt: {
     locale: "pt-PT",
     title: "Urgências do SNS: como vão estar os próximos dias",
     lede: "Previsão do tempo médio de espera (da triagem até ao médico) e do número de episódios nas urgências, por região de Portugal Continental, até 14 dias. Calculada todos os dias a partir de dados públicos.",
-    official: "Últimos dados oficiais do SNS", delay: (n) => `publicados com ${n} dias de atraso`,
+    official: "Últimos dados oficiais", delay: (n) => `publicados com ${n} dias de atraso`, delayShort: (n) => `${n} dias de atraso`,
     computed: "Previsão calculada", stale: "Atenção: a previsão não é atualizada há mais de 2 dias.",
     loading: "A carregar…", loadError: "Não foi possível carregar a previsão.",
     targets: { wait_minutes: "Tempo de espera", episodes: "Episódios" },
@@ -262,14 +300,15 @@ const I18N = {
     likely: "Faixa provável",
     likelyExplain: "Em 8 de cada 10 dias, o valor real fica dentro da faixa provável (verificado em 2025–2026).",
     legendPoint: "previsão", legendRange: "faixa provável", legendNormal: "normal para a época",
-    normalFor: (v, u) => `normal para a época: ${v} ${u}`,
     levels: { low: "Abaixo do normal", normal: "Normal para a época", high: "Acima do normal", veryhigh: "Muito acima do normal" },
     levelsShort: { low: "Abaixo", normal: "Normal", high: "Acima", veryhigh: "Muito acima" },
-    lastOfficial: "Último valor oficial",
-    typicalError: "Erro habitual desta previsão", typicalErrorSub: (n) => `a ${n} dias do último dado oficial, medido em 2025–2026`,
-    noError: "sem medição: região fora da avaliação dos modelos",
+    mapTitle: (when) => `${when} no país`, mapHint: "Toque numa região para a ver em detalhe.", mapNote: "Mapa esquemático: os blocos seguem a ordem norte–sul, não as fronteiras reais.",
+    noForecast: "sem dados recentes",
+    lastOfficial: "Último valor oficial", typicalError: "Erro habitual desta previsão",
+    typicalErrorSub: (n) => `a ${n} dias do último dado oficial`, noError: "sem medição para esta região",
+    busiest: "Dia mais carregado", busiestNone: "—",
     daysTitle: "Dia a dia",
-    daysHint: "Valor previsto, faixa provável e nível em relação ao normal para a época. Os dias a cinzento já passaram, mas o SNS ainda não os publicou.",
+    daysHint: "Valor previsto, faixa provável e nível em relação ao normal para a época. A cinzento: dias que já passaram mas o SNS ainda não publicou.",
     pendingTag: "ainda não publicado",
     chartHint: "Últimas 4 semanas de dados oficiais e a previsão. Passe o rato (ou use as setas) para ver cada dia.",
     lgOfficial: "Dados oficiais do SNS", lgForecast: "Previsão", lgRange: "Faixa provável (80 %)", lgNormal: "Normal para a época", lgPending: "Ainda não publicado pelo SNS",
@@ -278,9 +317,6 @@ const I18N = {
     tKindPending: "ainda não publicado", tKindForecast: "previsão", tKindOfficial: "dado oficial",
     showTable: "Ver os valores em tabela",
     th: ["Dia", "Tipo", "Previsão", "Faixa provável", "Normal"], kindPending: "Ainda não publicado", kindForecast: "Previsão",
-    regionsTitle: (when) => `${when} em todas as regiões`,
-    regionsHint: "A barra é a previsão; o traço vertical é o normal para a época. Toque numa região para a ver em detalhe.",
-    noForecast: "sem dados",
     inactive: (region, what, last) => `${region}: o SNS não está a publicar ${what} para esta região, por isso não há previsão.${last ? ` O último valor publicado é de ${last}.` : ""} A região volta a ser prevista automaticamente quando a publicação for retomada.`,
     aboutTitle: "Como funciona",
     about: [
@@ -292,6 +328,7 @@ const I18N = {
     ],
     code: "Código, decisões e avaliação completa:",
     emergency: "Esta página não substitui aconselhamento médico. Numa emergência ligue 112. Em caso de dúvida ligue SNS 24: 808 24 24 24.",
+    footer: "Projeto independente, sem ligação ao SNS. Dados públicos do Portal da Transparência do SNS e do Open-Meteo.",
     regionNames: { "ARS Norte": "Norte", "ARS Centro": "Centro", "ARS Lisboa e Vale do Tejo": "Lisboa e Vale do Tejo", "ARS Alentejo": "Alentejo", "ARS Algarve": "Algarve", "Portugal Continental": "Portugal Continental" },
     months: ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"],
     regionLabel: "Região",
@@ -300,7 +337,7 @@ const I18N = {
     locale: "en-GB",
     title: "Portuguese NHS emergency departments: the days ahead",
     lede: "Forecast of the average waiting time (from triage to the first doctor) and the number of emergency visits, per region of mainland Portugal, up to 14 days ahead. Updated daily from public data.",
-    official: "Latest official SNS data", delay: (n) => `published ${n} days late`,
+    official: "Latest official data", delay: (n) => `published ${n} days late`, delayShort: (n) => `${n} days late`,
     computed: "Forecast computed", stale: "Warning: the forecast has not been updated for more than 2 days.",
     loading: "Loading…", loadError: "The forecast could not be loaded.",
     targets: { wait_minutes: "Waiting time", episodes: "Visits" },
@@ -312,14 +349,15 @@ const I18N = {
     likely: "Likely range",
     likelyExplain: "On 8 days out of 10, the actual value falls inside the likely range (checked on 2025–2026).",
     legendPoint: "forecast", legendRange: "likely range", legendNormal: "seasonal normal",
-    normalFor: (v, u) => `seasonal normal: ${v} ${u}`,
     levels: { low: "Below normal", normal: "Normal for the season", high: "Above normal", veryhigh: "Well above normal" },
     levelsShort: { low: "Below", normal: "Normal", high: "Above", veryhigh: "Well above" },
-    lastOfficial: "Latest official value",
-    typicalError: "Typical error of this forecast", typicalErrorSub: (n) => `${n} days after the latest official data, measured on 2025–2026`,
-    noError: "not measured: region outside the model evaluation",
+    mapTitle: (when) => `${when} across the country`, mapHint: "Tap a region to see it in detail.", mapNote: "Schematic map: blocks follow the north–south order, not the real borders.",
+    noForecast: "no recent data",
+    lastOfficial: "Latest official value", typicalError: "Typical error of this forecast",
+    typicalErrorSub: (n) => `${n} days after the latest official data`, noError: "not measured for this region",
+    busiest: "Busiest day", busiestNone: "—",
     daysTitle: "Day by day",
-    daysHint: "Forecast value, likely range and level compared with the seasonal normal. Grey days are in the past but not yet published by the SNS.",
+    daysHint: "Forecast value, likely range and level compared with the seasonal normal. Grey: past days the SNS has not published yet.",
     pendingTag: "not yet published",
     chartHint: "Last 4 weeks of official data and the forecast. Hover (or use the arrow keys) to see each day.",
     lgOfficial: "Official SNS data", lgForecast: "Forecast", lgRange: "Likely range (80 %)", lgNormal: "Seasonal normal", lgPending: "Not yet published by the SNS",
@@ -328,9 +366,6 @@ const I18N = {
     tKindPending: "not yet published", tKindForecast: "forecast", tKindOfficial: "official value",
     showTable: "Show the values as a table",
     th: ["Day", "Type", "Forecast", "Likely range", "Normal"], kindPending: "Not yet published", kindForecast: "Forecast",
-    regionsTitle: (when) => `${when} in every region`,
-    regionsHint: "The bar is the forecast; the vertical mark is the seasonal normal. Tap a region to see it in detail.",
-    noForecast: "no data",
     inactive: (region, what, last) => `${region}: the SNS is not publishing ${what} for this region, so there is no forecast.${last ? ` The latest published value is from ${last}.` : ""} The region will be forecast again automatically when publication resumes.`,
     aboutTitle: "How it works",
     about: [
@@ -342,13 +377,14 @@ const I18N = {
     ],
     code: "Code, decisions and full evaluation:",
     emergency: "This page is not medical advice. In an emergency call 112. If in doubt call SNS 24: 808 24 24 24.",
+    footer: "Independent project, not affiliated with the SNS. Public data from the SNS Transparency Portal and Open-Meteo.",
     regionNames: { "ARS Norte": "North", "ARS Centro": "Centre", "ARS Lisboa e Vale do Tejo": "Lisbon and Tagus Valley", "ARS Alentejo": "Alentejo", "ARS Algarve": "Algarve", "Portugal Continental": "Mainland Portugal" },
     months: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
     regionLabel: "Region",
   },
 };
 
-// Nível em relação ao normal: cor de estado sempre acompanhada de ícone e texto.
+// Nível face ao normal: cor de estado, sempre com ícone e texto. Azul = normal.
 const LEVELS = {
   low: { color: "var(--good)", icon: "▼" },
   normal: { color: "var(--series)", icon: "●" },
@@ -357,7 +393,7 @@ const LEVELS = {
 };
 
 const state = { lang: "pt", target: "wait_minutes", region: "Portugal Continental", range: 7 };
-let DATA = null, ACC = null;
+let DATA = null, ACC = null, animated = false;
 const T = () => I18N[state.lang];
 const el = (id) => document.getElementById(id);
 const parseDay = (s) => { const [y, m, d] = s.split("-").map(Number); return new Date(y, m - 1, d); };
@@ -372,9 +408,10 @@ const dayLong = (s) => new Intl.DateTimeFormat(T().locale, { weekday: "long", da
 const weekday = (s) => new Intl.DateTimeFormat(T().locale, { weekday: "short" }).format(parseDay(s)).replace(".", "");
 const regionName = (r) => T().regionNames[r] || r;
 const todayISO = () => isoDay(new Date());
+const keySwatch = (cls, style) => { const i = h("i", cls); Object.assign(i.style, style); return i; };
 
 function level(p) {
-  if (p.normal == null) return null;
+  if (!p || p.normal == null) return null;
   const pct = (p.y - p.normal) / p.normal;
   return pct < -0.1 ? "low" : pct <= 0.1 ? "normal" : pct <= 0.25 ? "high" : "veryhigh";
 }
@@ -393,18 +430,18 @@ function setLang(lang) {
 
 function renderStatus() {
   const s = el("status"); s.textContent = "";
-  const a = h("span", "pill official"); a.append(`${T().official}: `, h("strong", null, dayLong(DATA.last_official_day)), ` (${T().delay(DATA.delay_days)})`);
+  const a = h("span", "pill"); a.append(`${T().official}: `, h("strong", null, dayShort(DATA.last_official_day)), ` · ${T().delayShort(DATA.delay_days)}`);
   const run = new Date(DATA.run_at);
   const b = h("span", "pill"); b.append(`${T().computed}: `, h("strong", null, run.toLocaleString(T().locale, { dateStyle: "medium", timeStyle: "short" })));
   s.append(a, b);
-  if ((Date.now() - run.getTime()) / 86400000 > 2) s.append(h("span", "stale", T().stale));
+  if ((Date.now() - run.getTime()) / 86400000 > 2) s.append(h("span", "pill stale", T().stale));
 }
 
 function fillTargets() {
   const seg = el("target-seg"); seg.textContent = "";
   for (const key of Object.keys(DATA.targets)) {
     const b = h("button", null, T().targets[key]); b.type = "button"; b.setAttribute("aria-pressed", String(key === state.target));
-    b.addEventListener("click", () => { state.target = key; fillTargets(); fillRegions(); render(); });
+    b.addEventListener("click", () => { state.target = key; animated = false; fillTargets(); fillRegions(); render(); });
     seg.append(b);
   }
 }
@@ -416,6 +453,8 @@ function fillRegions() {
   if (!available.includes(state.region)) state.region = available.includes("Portugal Continental") ? "Portugal Continental" : available[0];
   r.value = state.region;
 }
+
+function selectRegion(r) { state.region = r; el("region").value = r; animated = false; render(); }
 
 function visibleForecast(series) {
   if (state.range === 14) return series.forecast;
@@ -429,61 +468,105 @@ function focusPoint(series) {
   return fc.find((d) => d.date === today) || fc.find((d) => d.date > today) || fc[fc.length - 1];
 }
 
-function badge(lv, small) {
-  const b = h("span", small ? "badge sm" : "badge"); const ic = h("span", "ic", LEVELS[lv].icon);
-  b.style.setProperty("--level", LEVELS[lv].color);
-  ic.style.background = LEVELS[lv].color; ic.setAttribute("aria-hidden", "true");
-  b.append(ic, h("span", "lbl", T().levels[lv])); b.title = T().levels[lv]; return b;
+function countUp(node, target) {
+  if (REDUCED_MOTION || animated) { node.textContent = num(target); return; }
+  animated = true;
+  const start = performance.now(), dur = 700;
+  const step = (now) => { const t = Math.min(1, (now - start) / dur); node.textContent = num(target * (1 - Math.pow(1 - t, 3))); if (t < 1) requestAnimationFrame(step); };
+  requestAnimationFrame(step);
 }
-
-function keySwatch(cls, style) { const i = h("i", cls); Object.assign(i.style, style); return i; }
 
 function renderHero(series) {
   const hero = el("hero"); hero.textContent = "";
-  const p = focusPoint(series), today = todayISO();
-  const main = h("div", "hero-main");
-  main.append(h("div", "eyebrow", T().forecastFor(p.date === today ? T().today : dayLong(p.date), regionName(state.region))));
-  const big = h("div", "big", num(p.y)); big.append(h("small", null, unit())); main.append(big);
-  const lv = level(p); if (lv) main.append(badge(lv));
+  const p = focusPoint(series), today = todayISO(), lv = level(p);
   hero.style.setProperty("--level", lv ? LEVELS[lv].color : "var(--series)");
-  const range = h("div", "range"); range.append(`${T().likely}: `, h("strong", null, `${num(p.low)}–${num(p.high)} ${unit()}`)); main.append(range);
-  // Régua: faixa provável, previsão e normal na mesma escala.
+  hero.append(h("div", "eyebrow", T().forecastFor(p.date === today ? T().today : dayLong(p.date), regionName(state.region))));
+  const row = h("div", "big-row");
+  const big = h("div", "big"); const n = h("span"); big.append(n, h("small", null, unit())); countUp(n, p.y); row.append(big);
+  if (lv) { const b = h("span", "badge"); b.style.setProperty("--level", LEVELS[lv].color); const ic = h("span", "ic", LEVELS[lv].icon); ic.setAttribute("aria-hidden", "true"); b.append(ic, T().levels[lv]); row.append(b); }
+  hero.append(row);
+  const range = h("div", "range"); range.append(`${T().likely}: `, h("strong", null, `${num(p.low)}–${num(p.high)} ${unit()}`)); hero.append(range);
   const lo = Math.min(p.low, p.normal ?? p.low), hi = Math.max(p.high, p.normal ?? p.high), pad = (hi - lo) * 0.15 || 1;
   const pos = (v) => `${(100 * (v - (lo - pad))) / (hi - lo + 2 * pad)}%`;
   const bar = h("div", "range-bar"); bar.setAttribute("aria-hidden", "true");
   const band = h("div", "band"); band.style.left = pos(p.low); band.style.right = `calc(100% - ${pos(p.high)})`; bar.append(band);
   if (p.normal != null) { const nm = h("div", "nm"); nm.style.left = pos(p.normal); bar.append(nm); }
-  const pt = h("div", "pt"); pt.style.left = pos(p.y); bar.append(pt); main.append(bar);
+  const pt = h("div", "pt"); pt.style.left = pos(p.y); bar.append(pt); hero.append(bar);
   const lg = h("div", "range-legend");
   const item = (sw, text) => { const s = h("span"); s.append(sw, text); lg.append(s); };
   item(keySwatch("key-box", { background: "var(--series)", borderRadius: "50%", width: "10px", height: "10px" }), T().legendPoint);
   item(keySwatch("key-box", { background: "var(--series-soft)" }), T().legendRange);
   if (p.normal != null) item(keySwatch("key-line", { background: "var(--ink-2)", width: "2px", height: "12px" }), `${T().legendNormal} (${num(p.normal)})`);
-  main.append(lg, h("div", "explain", T().likelyExplain));
+  hero.append(lg, h("div", "explain", T().likelyExplain));
+  renderStats(series, hero);
+}
 
-  const side = h("div", "hero-side");
-  const mini = (k, v, withUnit, s) => { const m = h("div", "mini"); m.append(h("div", "k", k)); const vv = h("div", "v", v); if (withUnit) vv.append(h("small", null, unit())); m.append(vv); if (s) m.append(h("div", "s", s)); side.append(m); };
+function renderMap() {
+  const box = el("map"); box.textContent = "";
+  const all = DATA.series[state.target];
+  const ref = focusPoint(all[state.region] || Object.values(all)[0]);
+  el("map-title").textContent = T().mapTitle(ref.date === todayISO() ? T().today : dayLong(ref.date));
+  for (const r of DATA.regions) {
+    const p = all[r] ? all[r].forecast.find((d) => d.date === ref.date) : null;
+    const lv = level(p);
+    const t = h("button", `tile ${TILE_CLASS[r] || ""}`); t.type = "button";
+    t.setAttribute("aria-pressed", String(r === state.region));
+    if (lv) t.style.setProperty("--level", LEVELS[lv].color);
+    t.append(h("span", "tn", regionName(r)));
+    if (p) {
+      const v = h("span", "tv", num(p.y)); v.append(h("small", null, unit())); t.append(v);
+      if (lv) { const l = h("span", "tl"); l.append(h("i"), T().levels[lv]); t.append(l); }
+      t.addEventListener("click", () => selectRegion(r));
+    } else { t.append(h("span", "tv", T().noForecast)); t.disabled = true; }
+    box.append(t);
+  }
+}
+
+const ICONS = {
+  calendar: "M4 6h16v14H4zM4 10h16M8 3v4M16 3v4",
+  error: "M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18M12 8a4 4 0 1 0 0 8a4 4 0 1 0 0-8M12 11.5v1",
+  peak: "M4 18l5-6 4 3 7-9M15 6h5v5",
+};
+function icon(name) {
+  const s = svgEl("svg", { viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", "stroke-width": 2, "stroke-linecap": "round", "stroke-linejoin": "round", "aria-hidden": "true" });
+  s.append(svgEl("path", { d: ICONS[name] })); return s;
+}
+
+function renderStats(series, hero) {
+  const box = h("div", "stats");
+  const stat = (ic, k, v, withUnit, sub) => {
+    const c = h("div", "stat"); const i = h("span", "si"); i.append(icon(ic));
+    const body = h("div"); body.append(h("div", "k", k)); const vv = h("div", "v", v); if (withUnit) vv.append(h("small", null, unit())); body.append(vv); if (sub) body.append(h("div", "s", sub));
+    c.append(i, body); box.append(c);
+  };
+  const p = focusPoint(series);
   const lastObs = [...series.observed].reverse().find((d) => d.value != null);
-  if (lastObs) mini(T().lastOfficial, num(lastObs.value), true, `${dayLong(lastObs.date)} · ${T().delay(DATA.delay_days)}`);
+  if (lastObs) stat("calendar", T().lastOfficial, num(lastObs.value), true, `${dayShort(lastObs.date)} · ${T().delayShort(DATA.delay_days)}`);
   const acc = ACC && ACC.targets[state.target] && ACC.targets[state.target][state.region];
-  if (acc) mini(T().typicalError, `±${num(acc.by_horizon[String(p.horizon)] ?? acc["1-7"])}`, true, T().typicalErrorSub(p.horizon));
-  else if (ACC) mini(T().typicalError, "—", false, T().noError);
-  hero.append(main, side);
+  if (acc) stat("error", T().typicalError, `±${num(acc.by_horizon[String(p.horizon)] ?? acc["1-7"])}`, true, T().typicalErrorSub(p.horizon));
+  else stat("error", T().typicalError, "—", false, T().noError);
+  const today = todayISO();
+  const peak = visibleForecast(series).filter((d) => d.date >= today).reduce((a, c) => (!a || c.y > a.y ? c : a), null);
+  if (peak) stat("peak", T().busiest, num(peak.y), true, dayLong(peak.date));
+  hero.append(box);
 }
 
 function renderDays(series) {
   const box = el("days"); box.textContent = "";
-  const today = todayISO();
-  for (const d of visibleForecast(series)) {
-    const c = h("div", "day" + (d.date === today ? " today" : "") + (d.kind === "not_yet_published" ? " pending" : ""));
-    c.append(h("div", "dn", d.date === today ? T().today : weekday(d.date)), h("div", "dd", dayShort(d.date)));
-    c.append(h("div", "dv", num(d.y)), h("div", "dr", `${num(d.low)}–${num(d.high)}`));
+  const today = todayISO(), list = visibleForecast(series);
+  const maxV = Math.max(...list.map((d) => d.high)), minV = Math.min(...list.map((d) => d.low));
+  for (const d of list) {
     const lv = level(d);
-    if (lv) { c.style.setProperty("--level", LEVELS[lv].color); const l = h("div", "lvl"); const dot = h("i"); dot.style.background = LEVELS[lv].color; l.append(dot, T().levelsShort[lv]); l.title = T().levels[lv]; c.append(l); }
+    const c = h("div", "day" + (d.date === today ? " today" : "") + (d.kind === "not_yet_published" ? " pending" : ""));
+    if (lv) c.style.setProperty("--level", LEVELS[lv].color);
+    c.append(h("div", "dn", d.date === today ? T().today : weekday(d.date)), h("div", "dd", dayShort(d.date)));
+    const meter = h("div", "meter"); meter.setAttribute("aria-hidden", "true"); const fill = h("span");
+    fill.style.height = `${Math.max(12, (100 * (d.y - minV * 0.9)) / (maxV - minV * 0.9))}%`; meter.append(fill); c.append(meter);
+    c.append(h("div", "dv", num(d.y)), h("div", "dr", `${num(d.low)}–${num(d.high)}`));
+    if (lv) { const l = h("div", "lvl"); l.append(h("i"), T().levelsShort[lv]); l.title = T().levels[lv]; c.append(l); }
     if (d.kind === "not_yet_published") c.append(h("div", "tag", T().pendingTag));
     box.append(c);
   }
-  // Só desloca se o cartão de hoje não couber à vista (ecrãs estreitos ou 14 dias).
   box.scrollLeft = 0;
   const t = box.querySelector(".today");
   if (t && t.offsetLeft - box.offsetLeft + t.offsetWidth > box.clientWidth) box.scrollLeft = t.offsetLeft - box.offsetLeft - 8;
@@ -534,7 +617,7 @@ function renderChart(series) {
   if (normalPts.length > 1) svg.append(svgEl("path", { d: path(normalPts), fill: "none", stroke: "var(--normal)", "stroke-width": 1.5 }));
   let seg = []; const flush = () => { if (seg.length > 1) svg.append(svgEl("path", { d: path(seg), fill: "none", stroke: "var(--observed)", "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round" })); seg = []; };
   obs.forEach((d) => { if (d.value == null) flush(); else seg.push([x(d.date), y(d.value)]); }); flush();
-  svg.append(svgEl("path", { d: path([...(lastObs ? [[x(lastObs.date), y(lastObs.value)]] : []), ...fc.map((d) => [x(d.date), y(d.y)])]), fill: "none", stroke: "var(--series)", "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round" }));
+  svg.append(svgEl("path", { d: path([...(lastObs ? [[x(lastObs.date), y(lastObs.value)]] : []), ...fc.map((d) => [x(d.date), y(d.y)])]), fill: "none", stroke: "var(--series)", "stroke-width": 2.5, "stroke-linejoin": "round", "stroke-linecap": "round" }));
   if (lastObs) svg.append(svgEl("circle", { cx: x(lastObs.date), cy: y(lastObs.value), r: 4, fill: "var(--observed)", stroke: "var(--surface)", "stroke-width": 2 }));
   const fp = focusPoint(series);
   if (fc.includes(fp)) svg.append(svgEl("circle", { cx: x(fp.date), cy: y(fp.y), r: 5, fill: "var(--series)", stroke: "var(--surface)", "stroke-width": 2 }));
@@ -585,35 +668,6 @@ function renderTable(series) {
   }
 }
 
-function renderRegions() {
-  const box = el("regions"); box.textContent = "";
-  const all = DATA.series[state.target];
-  const ref = focusPoint(all[state.region] || Object.values(all)[0]);
-  el("regions-title").textContent = T().regionsTitle(ref.date === todayISO() ? T().today : dayLong(ref.date));
-  const rows = DATA.regions.map((r) => ({ r, p: all[r] ? all[r].forecast.find((d) => d.date === ref.date) : null }));
-  const national = rows.filter((x) => x.r === "Portugal Continental"), regional = rows.filter((x) => x.r !== "Portugal Continental");
-  // As regiões partilham uma escala; nos episódios, o total nacional tem a sua (é a soma das regiões).
-  const scaleMax = (list) => Math.max(1, ...list.filter((x) => x.p).flatMap((x) => [x.p.y, x.p.normal ?? 0])) * 1.08;
-  const regMax = scaleMax(regional), natMax = state.target === "episodes" ? scaleMax(national) : Math.max(regMax, scaleMax(national));
-  const draw = (x, max) => {
-    const b = h("button", "reg"); b.type = "button"; b.setAttribute("aria-pressed", String(x.r === state.region));
-    b.append(h("span", "rn", regionName(x.r)));
-    const track = h("span", "track");
-    if (x.p) {
-      const bar = h("span", "bar"); bar.style.width = `${(100 * x.p.y) / max}%`; track.append(bar);
-      if (x.p.normal != null) { const nm = h("span", "nmk"); nm.style.left = `${(100 * x.p.normal) / max}%`; track.append(nm); }
-      b.title = `${regionName(x.r)}: ${num(x.p.y)} ${unit()} (${T().normalFor(num(x.p.normal), unit())})`;
-      b.addEventListener("click", () => { state.region = x.r; el("region").value = x.r; render(); window.scrollTo({ top: 0, behavior: "smooth" }); });
-    } else b.disabled = true;
-    b.append(track, h("span", "rv", x.p ? num(x.p.y) : T().noForecast));
-    const lv = x.p ? level(x.p) : null;
-    b.append(lv ? badge(lv, true) : h("span"));
-    box.append(b);
-  };
-  regional.forEach((x) => draw(x, regMax));
-  if (national.length) { box.append(h("div", "reg-sep")); national.forEach((x) => draw(x, natMax)); }
-}
-
 function renderInactive() {
   const box = el("inactive"); const list = DATA.inactive[state.target] || [];
   box.hidden = list.length === 0; box.textContent = "";
@@ -622,7 +676,7 @@ function renderInactive() {
 
 function render() {
   const series = DATA.series[state.target][state.region];
-  renderHero(series); renderDays(series); renderChart(series); renderTable(series); renderRegions(); renderInactive();
+  renderHero(series); renderMap(); renderDays(series); renderChart(series); renderTable(series); renderInactive();
 }
 
 async function load() {
@@ -633,7 +687,7 @@ async function load() {
   setLang(I18N[lang] ? lang : "pt");
   el("status").textContent = T().loading;
   document.querySelectorAll(".lang button").forEach((b) => b.addEventListener("click", () => setLang(b.dataset.lang)));
-  el("region").addEventListener("change", (e) => { state.region = e.target.value; render(); });
+  el("region").addEventListener("change", (e) => selectRegion(e.target.value));
   document.querySelectorAll("#range-seg button").forEach((b) => b.addEventListener("click", () => {
     state.range = Number(b.dataset.range);
     document.querySelectorAll("#range-seg button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
