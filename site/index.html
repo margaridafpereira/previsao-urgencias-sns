@@ -295,7 +295,7 @@ const I18N = {
     targetLong: { wait_minutes: "Tempo médio de espera", episodes: "Episódios de urgência por dia" },
     targetLower: { wait_minutes: "tempos de espera", episodes: "números de episódios" },
     units: { wait_minutes: "min", episodes: "episódios" },
-    next7: "Próximos 7 dias", upto14: "Até 14 dias",
+    next7: "Próximos 7 dias", upto14: "Até 14 dias", uptoDate: (d) => `Até ${d}`,
     today: "Hoje", forecastFor: (when, region) => `${when} · ${region}`,
     likely: "Faixa provável",
     likelyExplain: "Em 8 de cada 10 dias, o valor real fica dentro da faixa provável (verificado em 2025–2026).",
@@ -344,7 +344,7 @@ const I18N = {
     targetLong: { wait_minutes: "Average waiting time", episodes: "Emergency visits per day" },
     targetLower: { wait_minutes: "waiting times", episodes: "visit numbers" },
     units: { wait_minutes: "min", episodes: "visits" },
-    next7: "Next 7 days", upto14: "Up to 14 days",
+    next7: "Next 7 days", upto14: "Up to 14 days", uptoDate: (d) => `Up to ${d}`,
     today: "Today", forecastFor: (when, region) => `${when} · ${region}`,
     likely: "Likely range",
     likelyExplain: "On 8 days out of 10, the actual value falls inside the likely range (checked on 2025–2026).",
@@ -426,6 +426,13 @@ function setLang(lang) {
   const list = el("about-list"); list.textContent = "";
   for (const [k, v] of T().about) { const li = h("li"); li.append(h("strong", null, k), v); list.append(li); }
   if (DATA) { fillTargets(); fillRegions(); renderStatus(); render(); }
+}
+
+// O botão longo mostra a data do último dia previsto, para não prometer mais do que existe.
+function labelRange() {
+  const any = Object.values(DATA.series[state.target])[0];
+  const last = any.forecast[any.forecast.length - 1].date;
+  document.querySelector('#range-seg button[data-range="14"]').textContent = T().uptoDate(dayShort(last));
 }
 
 function renderStatus() {
@@ -676,6 +683,7 @@ function renderInactive() {
 
 function render() {
   const series = DATA.series[state.target][state.region];
+  labelRange();
   renderHero(series); renderMap(); renderDays(series); renderChart(series); renderTable(series); renderInactive();
 }
 
