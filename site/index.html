@@ -8,15 +8,15 @@
 <style>
   :root {
     color-scheme: light;
-    --page: #f9f9f7;
-    --surface: #fcfcfb;
-    --surface-2: #f3f2ee;
+    --page: #eef2f7;
+    --surface: #ffffff;
+    --surface-2: #f3f6fa;
     --ink: #0b0b0b;
     --ink-2: #52514e;
     --muted: #6f6e69;
     --grid: #e1e0d9;
     --axis: #c3c2b7;
-    --border: rgba(11, 11, 11, 0.10);
+    --border: rgba(16, 42, 84, 0.10);
     --series: #2a78d6;
     --series-wash: rgba(42, 120, 214, 0.12);
     --series-soft: #cde2fb;
@@ -28,7 +28,8 @@
     --serious: #ec835a;
     --neutral: #898781;
     --critical: #d03b3b;
-    --shadow: 0 1px 2px rgba(11, 11, 11, 0.04), 0 4px 16px rgba(11, 11, 11, 0.04);
+    --shadow: 0 1px 2px rgba(16, 42, 84, 0.05), 0 6px 20px rgba(16, 42, 84, 0.06);
+    --brand: #1c5cab;
   }
   @media (prefers-color-scheme: dark) {
     :root:where(:not([data-theme="light"])) {
@@ -36,7 +37,7 @@
       --page: #0d0d0d; --surface: #1a1a19; --surface-2: #232321; --ink: #ffffff; --ink-2: #c3c2b7; --muted: #a3a29b;
       --grid: #2c2c2a; --axis: #383835; --border: rgba(255, 255, 255, 0.10);
       --series: #3987e5; --series-wash: rgba(57, 135, 229, 0.18); --series-soft: #184f95;
-      --observed: #c3c2b7; --normal: #898781; --pending: rgba(195, 194, 183, 0.08); --shadow: none;
+      --observed: #c3c2b7; --normal: #898781; --pending: rgba(195, 194, 183, 0.08); --shadow: none; --brand: #3987e5;
     }
   }
   :root[data-theme="dark"] {
@@ -44,7 +45,7 @@
     --page: #0d0d0d; --surface: #1a1a19; --surface-2: #232321; --ink: #ffffff; --ink-2: #c3c2b7; --muted: #a3a29b;
     --grid: #2c2c2a; --axis: #383835; --border: rgba(255, 255, 255, 0.10);
     --series: #3987e5; --series-wash: rgba(57, 135, 229, 0.18); --series-soft: #184f95;
-    --observed: #c3c2b7; --normal: #898781; --pending: rgba(195, 194, 183, 0.08); --shadow: none;
+    --observed: #c3c2b7; --normal: #898781; --pending: rgba(195, 194, 183, 0.08); --shadow: none; --brand: #3987e5;
   }
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--page); color: var(--ink); font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
@@ -52,7 +53,8 @@
   button, select { font: inherit; color: inherit; }
 
   .top { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
-  h1 { font-size: 1.7rem; line-height: 1.2; margin: 0; font-weight: 700; letter-spacing: -0.01em; }
+  h1 { font-size: 1.7rem; line-height: 1.2; margin: 0; font-weight: 700; letter-spacing: -0.01em; display: flex; align-items: center; gap: 12px; }
+  h1 .logo { width: 40px; height: 40px; border-radius: 12px; background: var(--brand); color: #fff; display: inline-grid; place-items: center; font-size: 1.3rem; flex-shrink: 0; }
   .lede { color: var(--ink-2); margin: 6px 0 16px; max-width: 720px; }
   .lang { display: inline-flex; border: 1px solid var(--border); border-radius: 999px; overflow: hidden; flex-shrink: 0; background: var(--surface); }
   .lang button { border: 0; background: transparent; padding: 4px 12px; cursor: pointer; font-size: 0.85rem; font-weight: 600; color: var(--ink-2); min-height: 32px; }
@@ -75,7 +77,7 @@
   .card h2 { font-size: 1.05rem; margin: 0 0 4px; font-weight: 650; }
   .card .hint { font-size: 0.85rem; color: var(--muted); margin: 0 0 12px; }
 
-  .hero { display: grid; grid-template-columns: 1.4fr 1fr; gap: 20px; }
+  .hero { display: grid; grid-template-columns: 1.4fr 1fr; gap: 20px; border-left: 6px solid var(--level, var(--series)); }
   .hero-main { display: flex; flex-direction: column; gap: 8px; }
   .eyebrow { font-size: 0.9rem; color: var(--ink-2); font-weight: 500; }
   .big { font-size: 4.2rem; line-height: 1; font-weight: 700; letter-spacing: -0.02em; }
@@ -89,7 +91,9 @@
   .range-bar .nm { position: absolute; top: -5px; bottom: -5px; width: 2px; margin-left: -1px; background: var(--ink-2); border-radius: 1px; }
   .range-legend { font-size: 0.78rem; color: var(--muted); display: flex; gap: 14px; flex-wrap: wrap; }
   .range-legend span { display: inline-flex; align-items: center; gap: 5px; }
-  .badge { display: inline-flex; align-items: center; gap: 8px; padding: 5px 12px 5px 6px; border-radius: 999px; background: var(--surface-2); font-weight: 600; font-size: 0.92rem; width: fit-content; }
+  .badge { display: inline-flex; align-items: center; gap: 8px; padding: 5px 12px 5px 6px; border-radius: 999px; background: color-mix(in srgb, var(--level) 16%, var(--surface)); font-weight: 600; font-size: 0.92rem; width: fit-content; }
+  .badge.sm { font-size: 0.75rem; padding: 2px 8px 2px 3px; gap: 5px; font-weight: 600; }
+  .badge.sm .ic { width: 16px; height: 16px; font-size: 0.55rem; }
   .badge .ic { width: 22px; height: 22px; border-radius: 50%; display: inline-grid; place-items: center; color: #fff; font-size: 0.7rem; line-height: 1; }
   .hero-side { display: grid; gap: 10px; align-content: start; }
   .mini { background: var(--surface-2); border-radius: 10px; padding: 10px 12px; }
@@ -99,8 +103,9 @@
   .mini .s { font-size: 0.8rem; color: var(--muted); }
 
   .days { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(92px, 1fr); gap: 8px; overflow-x: auto; padding-bottom: 6px; scroll-snap-type: x proximity; }
-  .day { border: 1px solid var(--border); border-radius: 12px; padding: 10px 8px; text-align: center; background: var(--surface); scroll-snap-align: start; }
-  .day.today { border-color: var(--series); box-shadow: inset 0 0 0 1px var(--series); }
+  .day { border: 1px solid var(--border); border-top: 5px solid var(--level, var(--border)); border-radius: 12px; padding: 10px 8px; text-align: center; background: var(--surface); scroll-snap-align: start; }
+  .day.today { box-shadow: 0 0 0 2px var(--series); }
+  .day.today .dn { color: var(--series); }
   .day.pending { background: var(--surface-2); }
   .day .dn { font-size: 0.82rem; font-weight: 650; color: var(--ink); text-transform: capitalize; }
   .day .dd { font-size: 0.75rem; color: var(--muted); }
@@ -127,7 +132,7 @@
   .tooltip .t-models { margin-top: 4px; padding-top: 4px; border-top: 1px solid var(--border); color: var(--ink-2); font-size: 0.78rem; }
 
   .regions { display: grid; gap: 4px; }
-  .reg { display: grid; grid-template-columns: minmax(110px, 200px) 1fr 80px; align-items: center; gap: 12px; padding: 7px 8px; border-radius: 10px; border: 0; background: transparent; cursor: pointer; text-align: left; }
+  .reg { display: grid; grid-template-columns: minmax(110px, 200px) 1fr 70px minmax(150px, auto); align-items: center; gap: 12px; padding: 7px 8px; border-radius: 10px; border: 0; background: transparent; cursor: pointer; text-align: left; }
   .reg:hover:not(:disabled) { background: var(--surface-2); }
   .reg[aria-pressed="true"] { background: var(--surface-2); }
   .reg .rn { font-size: 0.92rem; }
@@ -157,7 +162,9 @@
     .hero { grid-template-columns: 1fr; }
     .big { font-size: 3.3rem; }
     h1 { font-size: 1.4rem; }
-    .reg { grid-template-columns: 112px 1fr 64px; gap: 8px; }
+    .reg { grid-template-columns: 104px 1fr 52px 24px; gap: 8px; }
+    .reg .badge.sm .lbl { display: none; }
+    .reg .badge.sm { padding: 2px; }
   }
 </style>
 </head>
@@ -165,7 +172,7 @@
 <main>
   <div class="top">
     <div>
-      <h1 data-i18n="title"></h1>
+      <h1><span class="logo" aria-hidden="true">✚</span><span data-i18n="title"></span></h1>
       <p class="lede" data-i18n="lede"></p>
     </div>
     <div class="lang" role="group" aria-label="Idioma / Language">
@@ -257,11 +264,10 @@ const I18N = {
     legendPoint: "previsão", legendRange: "faixa provável", legendNormal: "normal para a época",
     normalFor: (v, u) => `normal para a época: ${v} ${u}`,
     levels: { low: "Abaixo do normal", normal: "Normal para a época", high: "Acima do normal", veryhigh: "Muito acima do normal" },
+    levelsShort: { low: "Abaixo", normal: "Normal", high: "Acima", veryhigh: "Muito acima" },
     lastOfficial: "Último valor oficial",
     typicalError: "Erro habitual desta previsão", typicalErrorSub: (n) => `a ${n} dias do último dado oficial, medido em 2025–2026`,
     noError: "sem medição: região fora da avaliação dos modelos",
-    modelsAgree: "Acordo entre os 4 modelos", agree: { high: "Alto", mid: "Médio", low: "Baixo" },
-    agreeSub: (v, u) => `maior diferença entre modelos: ${v} ${u}`,
     daysTitle: "Dia a dia",
     daysHint: "Valor previsto, faixa provável e nível em relação ao normal para a época. Os dias a cinzento já passaram, mas o SNS ainda não os publicou.",
     pendingTag: "ainda não publicado",
@@ -308,11 +314,10 @@ const I18N = {
     legendPoint: "forecast", legendRange: "likely range", legendNormal: "seasonal normal",
     normalFor: (v, u) => `seasonal normal: ${v} ${u}`,
     levels: { low: "Below normal", normal: "Normal for the season", high: "Above normal", veryhigh: "Well above normal" },
+    levelsShort: { low: "Below", normal: "Normal", high: "Above", veryhigh: "Well above" },
     lastOfficial: "Latest official value",
     typicalError: "Typical error of this forecast", typicalErrorSub: (n) => `${n} days after the latest official data, measured on 2025–2026`,
     noError: "not measured: region outside the model evaluation",
-    modelsAgree: "Agreement between the 4 models", agree: { high: "High", mid: "Medium", low: "Low" },
-    agreeSub: (v, u) => `largest gap between models: ${v} ${u}`,
     daysTitle: "Day by day",
     daysHint: "Forecast value, likely range and level compared with the seasonal normal. Grey days are in the past but not yet published by the SNS.",
     pendingTag: "not yet published",
@@ -346,7 +351,7 @@ const I18N = {
 // Nível em relação ao normal: cor de estado sempre acompanhada de ícone e texto.
 const LEVELS = {
   low: { color: "var(--good)", icon: "▼" },
-  normal: { color: "var(--neutral)", icon: "●" },
+  normal: { color: "var(--series)", icon: "●" },
   high: { color: "var(--warning)", icon: "▲" },
   veryhigh: { color: "var(--serious)", icon: "▲" },
 };
@@ -424,10 +429,11 @@ function focusPoint(series) {
   return fc.find((d) => d.date === today) || fc.find((d) => d.date > today) || fc[fc.length - 1];
 }
 
-function badge(lv) {
-  const b = h("span", "badge"); const ic = h("span", "ic", LEVELS[lv].icon);
+function badge(lv, small) {
+  const b = h("span", small ? "badge sm" : "badge"); const ic = h("span", "ic", LEVELS[lv].icon);
+  b.style.setProperty("--level", LEVELS[lv].color);
   ic.style.background = LEVELS[lv].color; ic.setAttribute("aria-hidden", "true");
-  b.append(ic, T().levels[lv]); return b;
+  b.append(ic, h("span", "lbl", T().levels[lv])); b.title = T().levels[lv]; return b;
 }
 
 function keySwatch(cls, style) { const i = h("i", cls); Object.assign(i.style, style); return i; }
@@ -439,6 +445,7 @@ function renderHero(series) {
   main.append(h("div", "eyebrow", T().forecastFor(p.date === today ? T().today : dayLong(p.date), regionName(state.region))));
   const big = h("div", "big", num(p.y)); big.append(h("small", null, unit())); main.append(big);
   const lv = level(p); if (lv) main.append(badge(lv));
+  hero.style.setProperty("--level", lv ? LEVELS[lv].color : "var(--series)");
   const range = h("div", "range"); range.append(`${T().likely}: `, h("strong", null, `${num(p.low)}–${num(p.high)} ${unit()}`)); main.append(range);
   // Régua: faixa provável, previsão e normal na mesma escala.
   const lo = Math.min(p.low, p.normal ?? p.low), hi = Math.max(p.high, p.normal ?? p.high), pad = (hi - lo) * 0.15 || 1;
@@ -461,11 +468,6 @@ function renderHero(series) {
   const acc = ACC && ACC.targets[state.target] && ACC.targets[state.target][state.region];
   if (acc) mini(T().typicalError, `±${num(acc.by_horizon[String(p.horizon)] ?? acc["1-7"])}`, true, T().typicalErrorSub(p.horizon));
   else if (ACC) mini(T().typicalError, "—", false, T().noError);
-  const models = DATA.models.map((m) => p[m]).filter((v) => v != null);
-  if (models.length > 1) {
-    const spread = Math.max(...models) - Math.min(...models), rel = spread / p.y;
-    mini(T().modelsAgree, T().agree[rel < 0.08 ? "high" : rel < 0.16 ? "mid" : "low"], false, T().agreeSub(num(spread), unit()));
-  }
   hero.append(main, side);
 }
 
@@ -477,7 +479,7 @@ function renderDays(series) {
     c.append(h("div", "dn", d.date === today ? T().today : weekday(d.date)), h("div", "dd", dayShort(d.date)));
     c.append(h("div", "dv", num(d.y)), h("div", "dr", `${num(d.low)}–${num(d.high)}`));
     const lv = level(d);
-    if (lv) { const l = h("div", "lvl"); const dot = h("i"); dot.style.background = LEVELS[lv].color; l.append(dot, T().levels[lv]); c.append(l); }
+    if (lv) { c.style.setProperty("--level", LEVELS[lv].color); const l = h("div", "lvl"); const dot = h("i"); dot.style.background = LEVELS[lv].color; l.append(dot, T().levelsShort[lv]); l.title = T().levels[lv]; c.append(l); }
     if (d.kind === "not_yet_published") c.append(h("div", "tag", T().pendingTag));
     box.append(c);
   }
@@ -604,6 +606,8 @@ function renderRegions() {
       b.addEventListener("click", () => { state.region = x.r; el("region").value = x.r; render(); window.scrollTo({ top: 0, behavior: "smooth" }); });
     } else b.disabled = true;
     b.append(track, h("span", "rv", x.p ? num(x.p.y) : T().noForecast));
+    const lv = x.p ? level(x.p) : null;
+    b.append(lv ? badge(lv, true) : h("span"));
     box.append(b);
   };
   regional.forEach((x) => draw(x, regMax));
