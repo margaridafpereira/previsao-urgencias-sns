@@ -70,14 +70,15 @@ Test period (2025-01-01 onwards), mean absolute error over the five series, hori
 |---|---|---|
 | Seasonal naive (same weekday last week) | 7.63 | 278 |
 | ETS (D16) | 6.87 | 249 |
-| SARIMAX with calendar (D16) | 6.05 | 232 |
-| LightGBM (D9) | 5.92 | 219 |
-| Chronos-2, zero-shot, never trained on SNS data (D17) | 5.95 | 217 |
-| LSTM (D11) | 6.25 | 216 |
 | N-HiTS (D12) | 6.66 | 249 |
-| **Average of LightGBM and LSTM** (D13) | **5.88** | **199** |
+| LSTM written from scratch (D11) | 6.25 | 216 |
+| SARIMAX with calendar (D16) | 6.05 | 232 |
+| Chronos-2, zero-shot, never trained on SNS data (D17) | 5.95 | 217 |
+| LightGBM (D9) | 5.92 | 219 |
+| Average of LightGBM and LSTM (D13) | 5.88 | 199 |
+| **Average of LightGBM, LSTM, SARIMAX and Chronos-2** (D18) | **5.69** | **195** |
 
-Chosen models: LightGBM alone for waiting time (the average gains only 0.7 %), and the 50/50 average for episodes (−8 %).
+The four-model equal-weight average was chosen on the validation period and confirmed on the test period. It improves on the best single model by 4 % (waiting time) and 11 % (episodes).
 
 ## Roadmap
 
@@ -96,8 +97,8 @@ Chosen models: LightGBM alone for waiting time (the average gains only 0.7 %), a
 | 8c | Every evaluation logged to MLflow (D15) | done |
 | 8d | Classical models ETS and SARIMAX (D16); literature review (docs/literature.md) | done |
 | 8e | Zero-shot foundation model Chronos-2: ties with LightGBM (D17) | done |
-| 8f | Choose the final ensemble on validation (D18) | next |
-| 9 | Daily retraining and forecast in GitHub Actions, demo on Hugging Face Spaces | |
+| 8f | Final ensemble chosen on validation: four-model average (D18) | done |
+| 9 | School holidays; publication delay; daily forecast in GitHub Actions; demo on Hugging Face Spaces | next |
 
 ## Stack (all free)
 

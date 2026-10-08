@@ -369,3 +369,33 @@ Its own 10–90 % interval, with no calibration, covers 76.5 % (waiting time, 17
 **Consequences.**
 - If the Algarve resumes publishing, it is forecast again after about 72 days of data (80 % of 90), with no code change. The global models already learnt its history from 2017–2025.
 - An inactive region is shown as "no recent waiting-time data", never with an invented or borrowed value (compare snsmonitor.pt in [data-sources.md](data-sources.md)).
+
+**Validation results** (added 2026-10-08): on 2023–2024, Chronos-2 scores 7.52 minutes for the waiting time (LightGBM 7.48) and 248 for episodes (LightGBM 238). Its 10–90 % interval covers 77.0 % and 77.9 %. For the waiting time it ties with LightGBM in both periods. For episodes it is weaker on validation than on test.
+
+---
+
+## D18: Final model: equal-weight average of the models, chosen on validation
+
+**Context.** D13 and D17 showed that averaging models with different errors helps. To avoid selecting on the test period, every equal-weight combination of LightGBM, LSTM, SARIMAX and Chronos-2 (15 in total) was ranked on the validation period. The test period was only used to confirm the ranking.
+
+**Results** (MAE for horizons 1–7, averaged over the five series; best five on validation plus references):
+
+| Combination | Waiting time, validation | Waiting time, test | Episodes, validation | Episodes, test |
+|---|---|---|---|---|
+| **LightGBM + LSTM + SARIMAX + Chronos-2** | **7.20** (best) | **5.69** | 220.3 | 195.2 |
+| LightGBM + LSTM + SARIMAX | 7.25 | 5.75 | **218.4** (best) | 196.5 |
+| LightGBM + LSTM + Chronos-2 | 7.23 | 5.74 | 219.2 | **194.2** |
+| LightGBM + Chronos-2 | 7.32 | 5.77 | 232.9 | 206.4 |
+| LightGBM + LSTM (D13) | 7.37 | 5.90 | 219.7 | 198.6 |
+| LightGBM alone | 7.48 | 5.92 | 237.9 | 218.9 |
+| Chronos-2 alone | 7.52 | 5.95 | 248.4 | 216.9 |
+
+**Findings.**
+- Every combination of two or more different models beats the best single model on both targets. The validation ranking matches the test ranking closely, so the gain is not luck.
+- **Waiting time:** the four-model average is best on validation and is confirmed on test: **5.69 minutes, −4 % against LightGBM**.
+- **Episodes:** the top combinations all contain the LSTM, and they are within 1 % of each other on validation (218–220). Without the LSTM, the best is 233. **The four-model average reaches 195 on test, −11 % against LightGBM.**
+- The **four-model equal-weight average** is within 1 % of the best combination for both targets. It is therefore chosen as the single configuration for both. It has no tuned weights, which keeps it robust.
+
+**Decision.** The best research result is the **four-model average: 5.69 minutes and 195 episodes on the test period.** The production setup (four models, or a simpler subset) is decided at deployment; see the trade-off below.
+
+**Trade-off for production.** LightGBM + Chronos-2 needs only one trained model, because Chronos-2 is zero-shot. It loses 1.4 % on the waiting time (5.77 vs. 5.69) but 6 % on episodes (206 vs. 195). Keeping the LSTM recovers most of the episode gain.
