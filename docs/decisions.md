@@ -399,3 +399,21 @@ Its own 10–90 % interval, with no calibration, covers 76.5 % (waiting time, 17
 **Decision.** The best research result is the **four-model average: 5.69 minutes and 195 episodes on the test period.** The production setup (four models, or a simpler subset) is decided at deployment; see the trade-off below.
 
 **Trade-off for production.** LightGBM + Chronos-2 needs only one trained model, because Chronos-2 is zero-shot. It loses 1.4 % on the waiting time (5.77 vs. 5.69) but 6 % on episodes (206 vs. 195). Keeping the LSTM recovers most of the episode gain.
+
+---
+
+## D20: Measure the SNS publication delay, and keep the daily collection lightweight
+
+**Context.** D8 assumes that the data for day `t` is available on day `t`. In practice it is not:
+- On 2026-10-07 and again on 2026-10-08 (10:22 UTC), the latest day published was 2026-10-03, so the delay was 4–5 days.
+- The catalogue showed the flu dataset as modified on 2026-10-06 with data up to 2026-10-03. This suggests the SNS publishes in batches, not every day.
+- snsmonitor.pt shows the same delay ([data-sources.md](data-sources.md)).
+
+The delay decides which horizons the published forecast really needs. If the latest data is from day `t` and today is `t + d`, then "today to 6 days ahead" means horizons `d` to `d + 6`.
+
+**Decision.**
+- `src/ingest/sns.py` appends one row per collection run and dataset to `data/raw/publication_log.csv` (`checked_at`, `dataset_id`, `last_day`). The daily GitHub Action commits it with the data. After a few weeks it shows the real delay and the publication pattern.
+- The daily collection no longer installs the modelling stack (PyTorch, neuralforecast, Chronos, MLflow). It uses `requirements-ingest.txt` (requests, pandas, pyarrow, pytest) and runs only the ingestion tests. This makes it faster and less likely to break.
+
+**Consequences.**
+- How the forecast handles the delay is decided once the log has a few weeks of data, or earlier if the forecast horizon is extended (see the roadmap).

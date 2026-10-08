@@ -12,6 +12,7 @@ from __future__ import annotations
 import io
 import struct
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 
 import pandas as pd
@@ -28,6 +29,9 @@ DATASETS: dict[str, str] = {
 }
 
 RAW_DIR = Path(__file__).resolve().parents[2] / "data" / "raw"
+# Uma linha por recolha e dataset: quando se verificou e qual o último dia publicado.
+# Serve para medir o atraso de publicação do SNS (decisão D20).
+PUBLICATION_LOG = RAW_DIR / "publication_log.csv"
 TIMEOUT_SECONDS = 120
 
 
@@ -66,6 +70,17 @@ def save(df: pd.DataFrame, dataset_id: str) -> Path:
     return path
 
 
+def log_publication(dataset_id: str, last_day, checked_at: datetime | None = None) -> None:
+    checked_at = checked_at or datetime.now(timezone.utc)
+    row = pd.DataFrame([{
+        "checked_at": checked_at.strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "dataset_id": dataset_id,
+        "last_day": pd.Timestamp(last_day).date().isoformat(),
+    }])
+    PUBLICATION_LOG.parent.mkdir(parents=True, exist_ok=True)
+    row.to_csv(PUBLICATION_LOG, mode="a", header=not PUBLICATION_LOG.exists(), index=False)
+
+
 def main() -> int:
     failures = 0
     for dataset_id, date_column in DATASETS.items():
@@ -77,6 +92,7 @@ def main() -> int:
             failures += 1
             continue
         first, last = df[date_column].min().date(), df[date_column].max().date()
+        log_publication(dataset_id, last)
         print(f"OK     {dataset_id}: {len(df):>6} linhas, {first} -> {last} ({path.name})")
     return 1 if failures else 0
 

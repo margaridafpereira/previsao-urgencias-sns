@@ -1,0 +1,5 @@
+# Dependências mínimas da recolha diária (GitHub Actions). Os modelos usam requirements.txt.
+requests==2.34.2
+pandas==3.0.6
+pyarrow==25.0.1
+pytest==9.1.1
