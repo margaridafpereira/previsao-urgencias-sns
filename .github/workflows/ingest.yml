@@ -40,5 +40,7 @@ jobs:
             echo "Sem dados novos."
           else
             git commit -m "dados: recolha de $(date -u +%Y-%m-%d)"
+            # Outro envio pode ter chegado entretanto (por exemplo, código novo): juntar antes de enviar.
+            git pull --rebase
             git push
           fi
