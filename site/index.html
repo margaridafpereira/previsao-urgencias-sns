@@ -280,6 +280,8 @@
 "use strict";
 const SVG_NS = "http://www.w3.org/2000/svg";
 const MODEL_NAMES = { lightgbm: "LightGBM", lstm: "LSTM", sarimax: "SARIMAX", chronos2: "Chronos-2" };
+// ?region=norte abre logo essa região (útil para partilhar).
+const REGION_SLUGS = { norte: "ARS Norte", centro: "ARS Centro", lvt: "ARS Lisboa e Vale do Tejo", alentejo: "ARS Alentejo", algarve: "ARS Algarve", pt: "Portugal Continental" };
 const TILE_CLASS = { "ARS Norte": "t-norte", "ARS Centro": "t-centro", "ARS Lisboa e Vale do Tejo": "t-lvt", "ARS Alentejo": "t-alentejo", "ARS Algarve": "t-algarve", "Portugal Continental": "t-pt" };
 const REDUCED_MOTION = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -705,6 +707,8 @@ async function load() {
     const [f, a] = await Promise.all([fetch("data/forecast.json", { cache: "no-cache" }), fetch("data/accuracy.json", { cache: "no-cache" })]);
     DATA = await f.json(); ACC = a.ok ? await a.json() : null;
   } catch (e) { el("status").textContent = T().loadError; return; }
+  const slug = new URLSearchParams(location.search).get("region");
+  if (slug && REGION_SLUGS[slug.toLowerCase()]) state.region = REGION_SLUGS[slug.toLowerCase()];
   fillTargets(); fillRegions(); renderStatus(); render();
   let timer; window.addEventListener("resize", () => { clearTimeout(timer); timer = setTimeout(render, 150); });
 }
