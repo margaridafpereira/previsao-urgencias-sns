@@ -33,7 +33,9 @@ def log_evaluation(forecasts: pd.DataFrame, model: str, target: str, test: bool,
         if params:
             mlflow.log_params(params)
         mlflow.log_metric("mae_1_7", table.loc["Média", "1-7"])
-        for horizon in range(1, 8):
+        if "8-14" in table.columns:
+            mlflow.log_metric("mae_8_14", table.loc["Média", "8-14"])
+        for horizon in [column for column in table.columns if isinstance(column, int)]:
             mlflow.log_metric(f"mae_h{horizon}", table.loc["Média", horizon])
         for region, value in table["1-7"].drop("Média").items():
             mlflow.log_metric(f"mae_{region.replace('ARS ', '').replace(' ', '_')}", value)

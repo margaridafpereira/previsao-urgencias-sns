@@ -3,14 +3,16 @@
     python -m src.baselines
 
 - last_value: o valor de ontem (da origem) repete-se nos 7 dias seguintes.
-- seasonal_naive: cada dia repete o mesmo dia da semana anterior,
-  ou seja `t + h` recebe o valor de `t + h - 7`, que é sempre conhecido na origem.
+- seasonal_naive: cada dia repete o mesmo dia da semana mais recente já conhecido:
+  `t + h` recebe `t + h - 7` (h <= 7) ou `t + h - 14` (h de 8 a 14).
 
 As lacunas do histórico são preenchidas com o último valor conhecido antes de
 servirem de entrada, para que haja sempre previsão (só usa informação passada).
 """
 
 from __future__ import annotations
+
+import math
 
 import pandas as pd
 
@@ -45,7 +47,7 @@ def last_value(observed: pd.DataFrame) -> pd.DataFrame:
 
 
 def seasonal_naive(observed: pd.DataFrame) -> pd.DataFrame:
-    return _forecast(observed, lambda horizon: 7 - horizon)
+    return _forecast(observed, lambda horizon: 7 * math.ceil(horizon / 7) - horizon)
 
 
 BASELINES = {"last_value": last_value, "seasonal_naive": seasonal_naive}

@@ -27,7 +27,7 @@ def test_features_do_not_use_data_after_the_origin():
     numeric = tampered.select_dtypes("number").columns
     tampered.loc[after, numeric] = tampered.loc[after, numeric] * 10
 
-    for horizon in (1, 7):
+    for horizon in (1, 7, 8, 14):
         original = build_features(daily, "wait_minutes", horizon)
         changed = build_features(tampered, "wait_minutes", horizon)
         columns = feature_columns(original)

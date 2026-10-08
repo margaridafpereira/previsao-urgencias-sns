@@ -39,3 +39,26 @@ def test_score_ignores_days_without_observed_value():
     })
     table = score(forecasts, (pd.Timestamp("2025-01-01"), None))
     assert table.loc[TARGET_REGIONS[0], 1] == pytest.approx(10.0)
+
+
+def test_seasonal_naive_beyond_one_week_uses_two_weeks_back():
+    observed = _observed([float(day) for day in range(30)])
+    forecasts = seasonal_naive(observed)
+    row = forecasts[(forecasts["origin"] == "2025-01-15") & (forecasts["horizon"] == 10)].iloc[0]
+    # origem dia 14 (0-based), alvo dia 24, copia o dia 10: o mesmo dia da semana mais recente já conhecido
+    assert row["y_pred"] == 10.0
+    assert (forecasts["horizon"].max(), forecasts["horizon"].min()) == (14, 1)
+
+
+def test_score_reports_short_and_long_horizons_separately():
+    forecasts = pd.DataFrame({
+        "origin": pd.to_datetime(["2025-01-01"] * 2),
+        "target_date": pd.to_datetime(["2025-01-02", "2025-01-11"]),
+        "horizon": [1, 10],
+        "ars": [TARGET_REGIONS[0]] * 2,
+        "y_true": [50.0, 50.0],
+        "y_pred": [48.0, 40.0],
+    })
+    table = score(forecasts, (pd.Timestamp("2025-01-01"), None))
+    assert table.loc[TARGET_REGIONS[0], "1-7"] == pytest.approx(2.0)
+    assert table.loc[TARGET_REGIONS[0], "8-14"] == pytest.approx(10.0)

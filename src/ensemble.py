@@ -54,7 +54,7 @@ def main() -> None:
             f"ensemble (peso {best})": combine(*test.values(), best),
         }
         summary = pd.DataFrame({
-            name: score(forecasts, TEST).loc["Média", [1, 7, "1-7"]] for name, forecasts in rows.items()
+            name: score(forecasts, TEST).loc["Média"].reindex([1, 7, "1-7", 14, "8-14"]).dropna() for name, forecasts in rows.items()
         }).T
         print(f"\n{target}: teste, MAE médio por horizonte")
         print(summary.to_string())

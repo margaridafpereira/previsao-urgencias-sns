@@ -14,7 +14,8 @@ import pandas as pd
 from src.data import REGIONS
 
 TARGETS = ["wait_minutes", "episodes"]
-HORIZONS = range(1, 8)
+HORIZONS = range(1, 15)  # até 14 dias: o SNS publica com cerca de 5 dias de atraso (D20, D22)
+SHORT_HORIZONS = range(1, 8)  # 1-7 dias, comparável com todas as avaliações anteriores
 
 # O Algarve fica de fora como alvo (D7).
 TARGET_REGIONS = [region for region in REGIONS if region != "ARS Algarve"]
@@ -44,8 +45,8 @@ def actuals(daily: pd.DataFrame, target: str) -> pd.DataFrame:
 def score(forecasts: pd.DataFrame, period: tuple[pd.Timestamp, pd.Timestamp | None]) -> pd.DataFrame:
     """MAE por região e horizonte, só nos dias do período com valor observado.
 
-    Devolve uma linha por região mais a linha "Média" e uma coluna por horizonte
-    mais a coluna "1-7".
+    Devolve uma linha por região mais a linha "Média" e uma coluna por horizonte,
+    mais as colunas "1-7" e, se houver horizontes acima de 7, "8-14".
     """
     scored = forecasts[in_period(forecasts["target_date"], period)].dropna(subset=["y_true"])
     if scored["y_pred"].isna().any():
@@ -53,7 +54,10 @@ def score(forecasts: pd.DataFrame, period: tuple[pd.Timestamp, pd.Timestamp | No
     error = (scored["y_true"] - scored["y_pred"]).abs()
     table = error.groupby([scored["ars"], scored["horizon"]]).mean().unstack("horizon")
     table = table.reindex(TARGET_REGIONS)
-    table["1-7"] = error.groupby(scored["ars"]).mean()
+    short = scored["horizon"].isin(SHORT_HORIZONS)
+    table["1-7"] = error[short].groupby(scored.loc[short, "ars"]).mean()
+    if (~short).any():
+        table["8-14"] = error[~short].groupby(scored.loc[~short, "ars"]).mean()
     table.loc["Média"] = table.mean()
     table.columns.name = "horizon"
     return table

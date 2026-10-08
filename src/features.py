@@ -11,6 +11,8 @@ espera subiu cerca de 30 % depois da COVID).
 
 from __future__ import annotations
 
+import math
+
 import holidays
 import pandas as pd
 
@@ -67,7 +69,9 @@ def build_features(daily: pd.DataFrame, target: str, horizon: int) -> pd.DataFra
     for lag in range(N_LAGS):
         columns[f"lag_{lag}"] = _long(y.shift(lag) - base, f"lag_{lag}")
     for weeks in (1, 2):
-        lag = 7 * weeks - horizon  # mesmo dia da semana do dia previsto, há `weeks` semanas
+        # Mesmo dia da semana do dia previsto, na semana mais recente já conhecida na origem
+        # (e na anterior): para h <= 7 é há 1 e 2 semanas, para h de 8 a 14 há 2 e 3 semanas.
+        lag = 7 * (math.ceil(horizon / 7) + weeks - 1) - horizon
         columns[f"same_weekday_{weeks}w"] = _long(y.shift(lag) - base, f"same_weekday_{weeks}w")
     columns["mean_7"] = _long(y.rolling(7).mean() - base, "mean_7")
     columns["std_28"] = _long(y.rolling(BASE_WINDOW).std(), "std_28")
